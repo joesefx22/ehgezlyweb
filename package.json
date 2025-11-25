@@ -1,0 +1,9 @@
+// package.json - أضف scripts
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
