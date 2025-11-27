@@ -137,3 +137,78 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+'use client';
+
+import Card from '@/components/ui/Card';
+import StadiumCard from '@/components/stadiums/StadiumCard';
+import Button from '@/components/ui/Button';
+import { useApi } from '@/hooks/useApi';
+import { Stadium } from '@/types';
+import { useEffect, useState } from 'react';
+import { Loader2, AlertCircle } from 'lucide-react';
+
+/**
+ * الصفحة الرئيسية للداشبورد (عرض الملاعب المتاحة للاعبين)
+ */
+const PlayerDashboardPage: React.FC = () => {
+  const { data: stadiums, isLoading, error, execute } = useApi<Stadium[]>(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // جلب قائمة الملاعب عند تحميل الصفحة
+  useEffect(() => {
+    execute('/stadiums');
+  }, [execute]);
+
+  // تصفية الملاعب بناءً على البحث
+  const filteredStadiums = stadiums?.filter(stadium => 
+    stadium.name.includes(searchTerm) || stadium.location.includes(searchTerm)
+  );
+
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold dark:text-white">اكتشف الملاعب المتاحة</h1>
+      
+      {/* Search Bar */}
+      <div className="flex gap-4">
+        <input 
+          type="text" 
+          placeholder="ابحث بالاسم أو الموقع..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="form-input flex-1"
+        />
+        <Button variant="primary">بحث</Button>
+      </div>
+
+      {isLoading && (
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
+      {error && (
+        <Card className="bg-red-50 border-red-200 text-red-600 p-4 flex items-center">
+          <AlertCircle className="h-5 w-5 rtl:ml-2 ltr:mr-2" />
+          <span>خطأ في تحميل الملاعب: {error}</span>
+        </Card>
+      )}
+
+      {filteredStadiums && filteredStadiums.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredStadiums.map((stadium) => (
+            <StadiumCard key={stadium.id} stadium={stadium} />
+          ))}
+        </div>
+      )}
+
+      {filteredStadiums?.length === 0 && !isLoading && (
+        <Card className="text-center p-8 text-gray-500">
+            لا توجد ملاعب متاحة حالياً تطابق معايير البحث.
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default PlayerDashboardPage;
