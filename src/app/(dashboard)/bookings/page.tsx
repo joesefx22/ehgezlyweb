@@ -154,3 +154,147 @@ export default function PlayerBookingsPage() {
     </div>
   );
 }
+
+'use client';
+
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import { useApi } from '@/hooks/useApi';
+import { Booking } from '@/types';
+import { useEffect, useState } from 'react';
+import { Loader2, Clock, MapPin, XCircle, CheckCircle } from 'lucide-react';
+import { cn, formatTimeDisplay } from '@/lib/utils';
+
+/**
+ * صفحة حجوزات اللاعب
+ */
+const PlayerBookingsPage: React.FC = () => {
+  const { data: bookings, isLoading, error, execute } = useApi<Booking[]>(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  useEffect(() => {
+    execute('/bookings/user'); // جلب حجوزات المستخدم
+  }, [execute]);
+
+  const getStatusBadge = (status: Booking['status']) => {
+    switch (status) {
+      case 'confirmed':
+        return <Badge variant="success">مؤكد</Badge>;
+      case 'pending':
+        return <Badge variant="warning">بانتظار الدفع</Badge>;
+      case 'cancelled':
+        return <Badge variant="danger">ملغي</Badge>;
+      case 'checked_in':
+        return <Badge variant="info">تم الدخول</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const openCancellationModal = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const handleCancelBooking = async () => {
+    if (!selectedBooking) return;
+
+    if (!confirm('هل أنت متأكد من إلغاء هذا الحجز؟ قد تطبق رسوم إلغاء.')) {
+        return;
+    }
+
+    setIsCancelling(true);
+    try {
+      await execute(`/bookings/${selectedBooking.id}/cancel`, 'PATCH');
+      alert('تم إلغاء الحجز بنجاح.');
+      // تحديث القائمة بعد الإلغاء
+      execute('/bookings/user'); 
+      setIsModalOpen(false);
+    } catch (err) {
+      alert(`فشل الإلغاء: ${(err as Error).message}`);
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold dark:text-white">حجوزاتي الحالية والسابقة</h1>
+
+      {isLoading && (
+        <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+      )}
+
+      {bookings && bookings.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6">
+          {bookings.map((booking) => (
+            <Card key={booking.id} className={cn(
+                'border-r-8',
+                booking.status === 'confirmed' ? 'border-primary' :
+                booking.status === 'cancelled' ? 'border-red-500' : 'border-accent'
+            )}>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold dark:text-white">حجز في: ملعب الإبهار (Mocked)</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <MapPin className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
+                    تاريخ الحجز: <span className="font-semibold rtl:mr-1 ltr:ml-1">{booking.date}</span>
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <Clock className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
+                    الوقت: <span className="font-semibold rtl:mr-1 ltr:ml-1">{formatTimeDisplay(booking.start_time)} - {formatTimeDisplay(booking.end_time)}</span>
+                  </p>
+                  <p className="text-lg font-bold text-primary dark:text-secondary">الإجمالي: {booking.total_price} د.ع</p>
+                </div>
+                
+                <div className="mt-4 md:mt-0 flex flex-col items-end space-y-2">
+                  {getStatusBadge(booking.status)}
+                  {booking.status === 'confirmed' && (
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => openCancellationModal(booking)}
+                    >
+                      إلغاء الحجز
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        !isLoading && <Card className="text-center p-8 text-gray-500">لا توجد لديك حجوزات حالياً.</Card>
+      )}
+
+      {/* Cancellation Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="تأكيد إلغاء الحجز">
+        {selectedBooking && (
+          <div className="space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">
+              أنت على وشك إلغاء حجز ملعب <span className="font-bold">ملعب الإبهار (Mocked)</span> في تاريخ <span className="font-bold">{selectedBooking.date}</span> ووقت <span className="font-bold">{formatTimeDisplay(selectedBooking.start_time)}.</span>
+            </p>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <XCircle className="h-5 w-5 inline rtl:ml-2 ltr:mr-2" />
+              يرجى العلم أن رسوم إلغاء قد تطبق حسب سياسة الملعب. هل تود المتابعة؟
+            </div>
+            <div className="flex justify-end pt-4">
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="rtl:ml-3 ltr:mr-3">
+                تراجع
+              </Button>
+              <Button variant="danger" isLoading={isCancelling} onClick={handleCancelBooking}>
+                نعم، قم بالإلغاء
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+export default PlayerBookingsPage;
