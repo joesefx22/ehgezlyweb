@@ -148,3 +148,14 @@ export default function SignupPage() {
     </div>
   );
 }
+
+import SignupForm from '@/components/forms/SignupForm';
+
+/**
+ * صفحة إنشاء حساب
+ */
+const SignupPage: React.FC = () => {
+  return <SignupForm />;
+};
+
+export default SignupPage;
