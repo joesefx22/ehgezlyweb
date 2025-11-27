@@ -1,3 +1,94 @@
+// أنواع البيانات المشتركة في التطبيق
+
+/** يمثل المستخدم في النظام */
+export type UserRole = 'player' | 'owner' | 'manager' | 'admin';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  is_approved: boolean;
+  avatar_url?: string;
+  created_at: string;
+}
+
+/** يمثل الملعب */
+export interface Stadium {
+  id: string;
+  owner_id: string;
+  name: string;
+  location: string;
+  size_m2: number;
+  price_per_hour: number;
+  description: string;
+  amenities: string[];
+  images: string[];
+  average_rating: number;
+}
+
+/** يمثل فترة زمنية متاحة للحجز */
+export interface TimeSlot {
+  id: string;
+  stadium_id: string;
+  start_time: string; // "HH:MM"
+  end_time: string; // "HH:MM"
+  date: string; // "YYYY-MM-DD"
+  is_booked: boolean;
+  price: number;
+}
+
+/** يمثل الحجز */
+export interface Booking {
+  id: string;
+  player_id: string;
+  stadium_id: string;
+  slot_id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  total_price: number;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'checked_in';
+  created_at: string;
+}
+
+/** يمثل طلب لاعب للانضمام إلى مباراة */
+export interface PlayerRequest {
+  id: string;
+  booking_id: string;
+  requester_id: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  message?: string;
+  created_at: string;
+}
+
+/** يمثل كود التعويض/الخصم */
+export interface CompensationCode {
+  id: string;
+  code: string;
+  discount_percentage: number;
+  valid_until: string;
+  status: 'active' | 'used' | 'expired';
+}
+
+/** بيانات إحصائية للوحة التحكم */
+export interface DashboardStats {
+  total_bookings: number;
+  total_revenue: number;
+  new_users: number;
+  available_stadiums: number;
+  pending_managers: number;
+}
+
+// أنواع بيانات الـ API
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors?: any;
+}
+
 // src/types/index.ts
 export type UserRole = 'player' | 'employee' | 'owner' | 'admin';
 
