@@ -35,3 +35,43 @@ body {
 [dir="rtl"] .text-right {
   text-align: left;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* استيراد خط القاهرة من Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* ألوان أساسية متوافقة مع Tailwind */
+    --color-primary: 26 127 70; /* #1a7f46 */
+    --color-secondary: 46 204 113; /* #2ecc71 */
+    --color-accent: 243 156 18; /* #f39c12 */
+    
+    /* ألوان الوضع الليلي */
+    --color-dark-bg: 10 25 41; /* #0a1929 */
+    --color-dark-card: 19 47 76; /* #132f4c */
+  }
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  direction: rtl; /* دعم اللغة العربية */
+}
+
+/* التنسيقات العامة للنماذج */
+.form-input {
+  @apply mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+}
+
+/* تنسيقات الوضع الليلي */
+.dark body {
+  background-color: rgb(var(--color-dark-bg));
+  color: #e0e0e0;
+}
+
+.dark .card {
+  background-color: rgb(var(--color-dark-card));
+}
