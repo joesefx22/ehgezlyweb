@@ -41,3 +41,19 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+import DashboardLayout from '@/components/dashboard/Layout';
+
+/**
+ * تخطيط (Layout) لمسارات اللاعبين (الداشبورد الرئيسية)
+ * يضمن أن المستخدم مسجل دخول وله صلاحية 'player'
+ */
+const PlayerDashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <DashboardLayout allowedRoles={['player']}>
+      {children}
+    </DashboardLayout>
+  );
+};
+
+export default PlayerDashboardLayout;
