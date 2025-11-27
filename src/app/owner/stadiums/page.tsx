@@ -147,3 +147,91 @@ export default function OwnerStadiumsPage() {
     </div>
   );
 }
+
+'use client';
+
+import DashboardLayout from '@/components/dashboard/Layout';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import { useApi } from '@/hooks/useApi';
+import { Stadium } from '@/types';
+import { useEffect } from 'react';
+import { Loader2, AlertCircle, MapPin, DollarSign, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+/**
+ * صفحة إدارة ملاعب المالك
+ */
+const OwnerStadiumsPage: React.FC = () => {
+  const { data: stadiums, isLoading, error, execute } = useApi<Stadium[]>(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    execute('/owner/stadiums'); // جلب ملاعب المالك
+  }, [execute]);
+
+  return (
+    <DashboardLayout allowedRoles={['owner', 'manager']}>
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold dark:text-white">ملاعبك المُدارة</h1>
+          <Button onClick={() => router.push('/owner/stadiums/new')} variant="primary" className="flex items-center">
+            <Plus className="h-5 w-5 rtl:ml-2 ltr:mr-2" />
+            إضافة ملعب جديد
+          </Button>
+        </div>
+
+        {isLoading && (
+          <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        )}
+
+        {error && (
+          <Card className="bg-red-50 border-red-200 text-red-600 p-4 flex items-center">
+            <AlertCircle className="h-5 w-5 rtl:ml-2 ltr:mr-2" />
+            <span>خطأ في تحميل الملاعب: {error}</span>
+          </Card>
+        )}
+
+        {stadiums && stadiums.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6">
+            {stadiums.map((stadium) => (
+              <Card key={stadium.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold dark:text-white">{stadium.name}</h2>
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="flex items-center"><MapPin className="h-4 w-4 rtl:ml-1 ltr:mr-1" /> {stadium.location}</span>
+                    <span className="flex items-center"><DollarSign className="h-4 w-4 rtl:ml-1 ltr:mr-1" /> {stadium.price_per_hour} د.ع / ساعة</span>
+                  </div>
+                  <Badge variant="success">نشط</Badge>
+                </div>
+                
+                <div className="mt-4 md:mt-0 flex space-x-3 rtl:space-x-reverse">
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={() => router.push(`/owner/stadiums/${stadium.id}`)}
+                  >
+                    إدارة
+                  </Button>
+                  <Button 
+                    variant="danger" 
+                    size="sm" 
+                    // Mocked action
+                    onClick={() => alert(`حذف الملعب: ${stadium.name}`)}
+                  >
+                    حذف
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          !isLoading && <Card className="text-center p-8 text-gray-500">لم تقم بإضافة أي ملاعب بعد. ابدأ الآن!</Card>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default OwnerStadiumsPage;
