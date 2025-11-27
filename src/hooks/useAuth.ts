@@ -77,3 +77,75 @@ export const useAuth = () => {
   }
   return context;
 };
+
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/auth-store';
+import { clearAuthData, setAuthData } from '@/lib/auth';
+import { apiRequest } from '@/lib/api';
+import { User, UserRole } from '@/types';
+
+/**
+ * خطاف (Hook) مخصص لإدارة حالة المصادقة والتحقق من الصلاحيات.
+ */
+export function useAuth() {
+  const { token, user, isAuthenticated, setUser } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // تحميل الحالة من التخزين المحلي عند التهيئة
+  useEffect(() => {
+    const storedToken = localStorage.getItem('ehgzly_token');
+    const storedUser = localStorage.getItem('ehgzly_user');
+
+    if (storedToken && storedUser) {
+      try {
+        const parsedUser: User = JSON.parse(storedUser);
+        setAuthData(storedToken, parsedUser);
+        
+        // التحقق من صلاحية التوكن عبر API (اختياري لكن موصى به)
+        checkTokenValidity(storedToken);
+
+      } catch (e) {
+        console.error("Failed to parse user data from localStorage", e);
+        clearAuthData();
+      }
+    } else {
+        setIsLoading(false);
+    }
+  }, []);
+
+  // دالة للتحقق من التوكن
+  const checkTokenValidity = async (t: string) => {
+    try {
+        const userData: User = await apiRequest('/me');
+        if (userData) {
+            setUser(userData);
+        } else {
+            clearAuthData();
+        }
+    } catch (e) {
+        console.error("Token validation failed", e);
+        clearAuthData();
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  /**
+   * للتحقق من دور المستخدم.
+   * @param roles الأدوار المطلوبة.
+   */
+  const checkRole = (roles: UserRole[]): boolean => {
+    if (!user) return false;
+    return roles.includes(user.role);
+  };
+
+  return {
+    isAuthenticated,
+    user,
+    role: user?.role,
+    isLoading,
+    checkRole,
+    logout: clearAuthData,
+    login: setAuthData,
+  };
+}
