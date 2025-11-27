@@ -1,60 +1,66 @@
-// src/components/stadiums/StadiumCard.tsx
-'use client';
-
+import React from 'react';
 import { Stadium } from '@/types';
-import Link from 'next/link';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import Badge from '../ui/Badge';
+import { MapPin, DollarSign, Star, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface StadiumCardProps {
   stadium: Stadium;
 }
 
-export default function StadiumCard({ stadium }: StadiumCardProps) {
+const StadiumCard: React.FC<StadiumCardProps> = ({ stadium }) => {
+  const router = useRouter();
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      <div className="h-48 bg-gray-200 relative">
-        {stadium.images && stadium.images.length > 0 ? (
-          <img
-            src={stadium.images[0]}
-            alt={stadium.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <span className="text-gray-400">لا توجد صورة</span>
-          </div>
-        )}
+    <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300">
+      <div className="relative h-48 bg-gray-200">
+        {/* Placeholder for Stadium Image */}
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-300/50">
+          <Zap className="h-10 w-10 text-primary" />
+        </div>
+        {/* Rating Badge */}
+        <div className="absolute top-3 rtl:left-3 ltr:right-3 bg-accent text-white font-bold p-2 rounded-full flex items-center shadow-lg">
+          {stadium.average_rating.toFixed(1)} <Star className="h-4 w-4 rtl:mr-1 ltr:ml-1 fill-white" />
+        </div>
       </div>
-      
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{stadium.name}</h3>
-        <p className="text-gray-600 mb-2">{stadium.location}</p>
-        
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-500">{stadium.type}</span>
-          <div className="flex items-center">
-            <span className="text-yellow-400">⭐</span>
-            <span className="text-sm text-gray-600 mr-1">
-              {stadium.average_rating || '0.0'}
-            </span>
+
+      <div className="p-4 space-y-3">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">{stadium.name}</h3>
+
+        <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm">
+          <MapPin className="h-4 w-4 rtl:ml-2 ltr:mr-2 text-primary" />
+          <span className="truncate">{stadium.location}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-green-600 font-bold text-lg">
+            <DollarSign className="h-5 w-5 rtl:ml-1 ltr:mr-1" />
+            <span>{stadium.price_per_hour} / ساعة</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-bold text-blue-600">
-            {stadium.price_per_hour} ج.س/ساعة
-          </span>
-          <span className="text-sm text-gray-500">
-            عربون: {stadium.deposit_amount} ج.س
-          </span>
+        <div className="flex flex-wrap gap-2 pt-2">
+            {stadium.amenities.slice(0, 3).map(amenity => (
+                <Badge key={amenity} variant='info'>{amenity}</Badge>
+            ))}
+            {stadium.amenities.length > 3 && (
+                <Badge variant='secondary'>+{stadium.amenities.length - 3} المزيد</Badge>
+            )}
         </div>
 
-        <Link
-          href={`/stadiums/${stadium.id}`}
-          className="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          احجز الآن
-        </Link>
+        <div className="pt-4">
+          <Button 
+            className="w-full" 
+            onClick={() => router.push(`/stadiums/${stadium.id}`)}
+          >
+            عرض التفاصيل والحجز
+          </Button>
+        </div>
       </div>
-    </div>
+    </Card>
   );
-}
+};
+
+export default StadiumCard;
