@@ -1,20 +1,50 @@
-// src/lib/auth.ts
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/nextauth"; // لو تستخدم next-auth - ضع إعداداتك هنا
+import { UserRole } from "@/types";
+import { useAuthStore } from "@/store/auth-store";
 
-// fallback: دالة افتراضية ترجع null لو مش معرف
-export async function authUser(req?: Request) {
-  try {
-    // Next.js App Router server route: not having req object, so use getServerSession wrapper
-    // تعديل حسب تنفيذك الفعلي. لو أنت تضع token في cookies أو header فاقرأها هنا.
-    const session = await getServerSession(authOptions as any);
-    if (!session || !session.user) return null;
-    return {
-      id: session.user.id,
-      email: session.user.email,
-      role: session.user.role,
-    };
-  } catch (err) {
-    return null;
-  }
-}
+/**
+ * دالة مساعدة لتخزين بيانات المصادقة محلياً (Token & User Data)
+ * @param token - توكن JWT
+ * @param user - بيانات المستخدم
+ */
+export const setAuthData = (token: string, user: any) => {
+    localStorage.setItem('ehgzly_token', token);
+    localStorage.setItem('ehgzly_user', JSON.stringify(user));
+    useAuthStore.getState().setAuth({ token, user });
+};
+
+/**
+ * دالة مساعدة لحذف بيانات المصادقة
+ */
+export const clearAuthData = () => {
+    localStorage.removeItem('ehgzly_token');
+    localStorage.removeItem('ehgzly_user');
+    useAuthStore.getState().logout();
+};
+
+/**
+ * دالة مساعدة للتحقق من صلاحية المستخدم
+ * @param requiredRoles - قائمة الأدوار المسموح لها بالوصول
+ * @param userRole - دور المستخدم الحالي
+ */
+export const hasPermission = (requiredRoles: UserRole[], userRole?: UserRole): boolean => {
+    if (!userRole) return false;
+    return requiredRoles.includes(userRole);
+};
+
+/**
+ * دالة مساعدة للتوجيه بناءً على الدور
+ * @param role - دور المستخدم
+ * @returns مسار التوجيه
+ */
+export const getDashboardPath = (role: UserRole): string => {
+    switch (role) {
+        case 'admin':
+            return '/admin/dashboard';
+        case 'owner':
+        case 'manager':
+            return '/owner/dashboard';
+        case 'player':
+        default:
+            return '/dashboard';
+    }
+};
