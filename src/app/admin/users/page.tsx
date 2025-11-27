@@ -261,3 +261,110 @@ export default function AdminUsersPage() {
     </div>
   );
 }
+
+'use client';
+
+import DashboardLayout from '@/components/dashboard/Layout';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import { useApi } from '@/hooks/useApi';
+import { User, UserRole } from '@/types';
+import { useEffect, useState } from 'react';
+import { Loader2, AlertCircle, Trash2, Edit } from 'lucide-react';
+
+/**
+ * صفحة إدارة المستخدمين (لـ Admin)
+ */
+const AdminUsersPage: React.FC = () => {
+  const { data: users, isLoading, error, execute, setData } = useApi<User[]>(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    execute('/admin/users'); // جلب جميع المستخدمين
+  }, [execute]);
+
+  const getRoleBadge = (role: UserRole) => {
+    switch (role) {
+      case 'admin':
+        return <Badge variant="danger">إداري</Badge>;
+      case 'owner':
+        return <Badge variant="warning">مالك ملعب</Badge>;
+      case 'manager':
+        return <Badge variant="info">مدير</Badge>;
+      case 'player':
+      default:
+        return <Badge variant="primary">لاعب</Badge>;
+    }
+  };
+
+  const filteredUsers = users?.filter(user => 
+    user.name.includes(searchTerm) || user.email.includes(searchTerm) || user.role.includes(searchTerm)
+  );
+
+  return (
+    <DashboardLayout allowedRoles={['admin']}>
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold dark:text-white">إدارة المستخدمين</h1>
+        
+        {/* Search Bar */}
+        <input 
+            type="text" 
+            placeholder="ابحث بالاسم أو البريد الإلكتروني..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="form-input"
+        />
+
+        {isLoading && (
+          <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        )}
+
+        {error && (
+          <Card className="bg-red-50 border-red-200 text-red-600 p-4 flex items-center">
+            <AlertCircle className="h-5 w-5 rtl:ml-2 ltr:mr-2" />
+            <span>خطأ في تحميل بيانات المستخدمين: {error}</span>
+          </Card>
+        )}
+
+        {filteredUsers && filteredUsers.length > 0 ? (
+          <Card>
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead>
+                <tr>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">الاسم</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">البريد الإلكتروني</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">الدور</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">الحالة</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium dark:text-white">{user.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getRoleBadge(user.role)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                        <Badge variant={user.is_approved ? 'success' : 'danger'}>
+                            {user.is_approved ? 'موافق عليه' : 'بانتظار الموافقة'}
+                        </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2 rtl:space-x-reverse">
+                      <Button size="sm" variant="secondary" className="p-2"><Edit className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="danger" className="p-2" onClick={() => alert(`حذف المستخدم: ${user.name}`)}><Trash2 className="h-4 w-4" /></Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        ) : (
+          !isLoading && <Card className="text-center p-8 text-gray-500">لا يوجد مستخدمون لعرضهم.</Card>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default AdminUsersPage;
