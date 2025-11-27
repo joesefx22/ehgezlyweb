@@ -108,3 +108,84 @@ export default function HomePage() {
     </div>
   );
 }
+
+import Link from 'next/link';
+import { SoccerBall, Users, Key } from 'lucide-react';
+
+/**
+ * الصفحة الرئيسية (Landing Page)
+ */
+const HomePage: React.FC = () => {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-dark-bg">
+      {/* Header */}
+      <header className="text-center mb-12">
+        <SoccerBall className="h-16 w-16 text-primary mx-auto mb-4" />
+        <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-3">
+          احجزلي
+        </h1>
+        <p className="text-xl text-gray-600 dark:text-gray-400">
+          ملعبك في ضغطة، وحجزك مؤكد عندنا.
+        </p>
+      </header>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-6">
+        <Link href="/login" passHref>
+          <button className="flex items-center justify-center px-8 py-4 bg-primary text-white text-xl font-bold rounded-xl shadow-lg hover:bg-secondary transition-colors duration-300 transform hover:scale-105 min-w-[250px]">
+            <Key className="h-6 w-6 rtl:ml-3 ltr:mr-3" />
+            تسجيل الدخول / الحجز
+          </button>
+        </Link>
+        <Link href="/signup" passHref>
+          <button className="flex items-center justify-center px-8 py-4 bg-gray-200 text-gray-800 text-xl font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-colors duration-300 transform hover:scale-105 min-w-[250px]">
+            <Users className="h-6 w-6 rtl:ml-3 ltr:mr-3" />
+            إنشاء حساب جديد
+          </button>
+        </Link>
+      </div>
+
+      {/* Feature Section */}
+      <section className="mt-16 w-full max-w-4xl text-center">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-8">
+          لماذا تختار احجزلي؟
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <FeatureCard 
+            icon={<MapPin className="h-8 w-8 text-accent" />}
+            title="سهولة الوصول"
+            description="ابحث عن الملاعب القريبة منك وحسب المواصفات المناسبة."
+          />
+          <FeatureCard 
+            icon={<Clock className="h-8 w-8 text-accent" />}
+            title="تأكيد فوري"
+            description="احجز مواعيدك وادفع بأمان عبر الإنترنت مع تأكيد فوري."
+          />
+          <FeatureCard 
+            icon={<Users className="h-8 w-8 text-accent" />}
+            title="تكوين فريقك"
+            description="انضم أو انشئ طلبات لجمع لاعبين لمباراتك القادمة."
+          />
+        </div>
+      </section>
+    </div>
+  );
+};
+
+interface FeatureCardProps {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => (
+    <div className="p-6 bg-white dark:bg-dark-card rounded-xl shadow-lg transform hover:shadow-xl transition-all duration-300">
+        <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-accent/10 mb-4">
+            {icon}
+        </div>
+        <h3 className="text-xl font-semibold dark:text-white mb-2">{title}</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">{description}</p>
+    </div>
+);
+
+export default HomePage;
