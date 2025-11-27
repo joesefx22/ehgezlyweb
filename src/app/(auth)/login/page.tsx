@@ -88,3 +88,14 @@ export default function LoginPage() {
     </div>
   );
 }
+
+import LoginForm from '@/components/forms/LoginForm';
+
+/**
+ * صفحة تسجيل الدخول
+ */
+const LoginPage: React.FC = () => {
+  return <LoginForm />;
+};
+
+export default LoginPage;
