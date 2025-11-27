@@ -1,93 +1,97 @@
-// src/components/dashboard/Sidebar.tsx
-'use client';
-
-import { User } from '@/types';
-import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { User, UserRole } from '@/types';
+import { LayoutDashboard, Users, Zap, Settings, LogOut, SoccerBall, ListChecks, MapPin, BarChart } from 'lucide-react';
+import { clearAuthData, getDashboardPath } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
-  user: User;
+  role?: UserRole;
+  user?: User | null;
 }
 
-export default function DashboardSidebar({ user }: SidebarProps) {
-  const { logout } = useAuth();
-  const pathname = usePathname();
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  roles: UserRole[];
+}
 
-  const playerMenu = [
-    { name: 'الرئيسية', href: '/dashboard', icon: '🏠' },
-    { name: 'الحجوزات', href: '/dashboard/bookings', icon: '📅' },
-    { name: 'طلبات اللاعبين', href: '/dashboard/player-requests', icon: '👥' },
-  ];
+const navItems: NavItem[] = [
+  { name: 'الرئيسية', href: '/dashboard', icon: LayoutDashboard, roles: ['player'] },
+  { name: 'لوحة التحكم', href: '/admin/dashboard', icon: BarChart, roles: ['admin'] },
+  { name: 'لوحة المالك', href: '/owner/dashboard', icon: BarChart, roles: ['owner', 'manager'] },
+  
+  // Player Routes
+  { name: 'حجوزاتي', href: '/bookings', icon: ListChecks, roles: ['player'] },
+  { name: 'طلبات اللاعبين', href: '/player-requests', icon: Users, roles: ['player'] },
+  
+  // Owner/Manager Routes
+  { name: 'ملاعبي', href: '/owner/stadiums', icon: SoccerBall, roles: ['owner', 'manager'] },
+  { name: 'حجوزات الملاعب', href: '/owner/bookings', icon: ListChecks, roles: ['owner', 'manager'] },
+  
+  // Admin Routes
+  { name: 'إدارة المستخدمين', href: '/admin/users', icon: Users, roles: ['admin'] },
+  { name: 'إدارة الملاعب', href: '/admin/stadiums', icon: MapPin, roles: ['admin'] },
+  { name: 'أكواد التعويض', href: '/admin/codes', icon: Zap, roles: ['admin'] },
+  { name: 'التقارير', href: '/admin/reports', icon: BarChart, roles: ['admin'] },
+];
 
-  const ownerMenu = [
-    { name: 'الرئيسية', href: '/owner/dashboard', icon: '🏠' },
-    { name: 'ملاعبى', href: '/owner/stadiums', icon: '⚽' },
-    { name: 'الحجوزات', href: '/owner/bookings', icon: '📅' },
-    { name: 'التقارير', href: '/owner/reports', icon: '📊' },
-  ];
+const Sidebar: React.FC<SidebarProps> = ({ role, user }) => {
+  const router = useRouter();
+  
+  if (!role) return null;
 
-  const adminMenu = [
-    { name: 'الرئيسية', href: '/admin/dashboard', icon: '🏠' },
-    { name: 'المستخدمين', href: '/admin/users', icon: '👥' },
-    { name: 'الملاعب', href: '/admin/stadiums', icon: '⚽' },
-    { name: 'الأكواد', href: '/admin/codes', icon: '🎫' },
-    { name: 'التقارير', href: '/admin/reports', icon: '📊' },
-  ];
-
-  const employeeMenu = [
-    { name: 'الرئيسية', href: '/employee/dashboard', icon: '🏠' },
-    { name: 'الحجوزات', href: '/employee/bookings', icon: '📅' },
-    { name: 'الملاعب', href: '/employee/stadiums', icon: '⚽' },
-  ];
-
-  const getMenu = () => {
-    switch (user.role) {
-      case 'player': return playerMenu;
-      case 'owner': return ownerMenu;
-      case 'admin': return adminMenu;
-      case 'employee': return employeeMenu;
-      default: return playerMenu;
-    }
+  const filteredNavItems = navItems.filter(item => item.roles.includes(role));
+  
+  const handleLogout = () => {
+    clearAuthData();
+    router.push('/login');
   };
 
-  const menu = getMenu();
-
   return (
-    <div className="w-64 bg-white shadow-lg">
-      <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-gray-800">احجزلي</h1>
-        <p className="text-sm text-gray-600 mt-1">{user.name}</p>
-        <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+    <nav className="fixed top-0 right-0 w-64 h-full bg-dark-card text-white p-4 shadow-xl z-30 transition-all duration-300 transform rtl:translate-x-0 rtl:-translate-x-full lg:rtl:translate-x-0">
+      <div className="flex items-center justify-center mb-6 border-b border-gray-700 pb-4">
+        <h1 className="text-2xl font-bold text-secondary">
+          <SoccerBall className="h-6 w-6 inline-block rtl:ml-2 ltr:mr-2" />
+          {role === 'admin' ? 'الإدارة' : role === 'owner' ? 'المالك' : 'احجزلي'}
+        </h1>
       </div>
 
-      <nav className="mt-6">
-        {menu.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 ${
-                isActive ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''
+      <div className="mb-8 p-3 bg-gray-700/50 rounded-lg">
+        <p className="font-semibold">{user?.name || 'مستخدم'}</p>
+        <p className="text-xs text-gray-400">الدور: {role}</p>
+      </div>
+
+      <ul className="space-y-2">
+        {filteredNavItems.map((item) => (
+          <li key={item.href}>
+            <Link 
+              href={item.href} 
+              className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
+                router.pathname === item.href 
+                  ? 'bg-primary text-white shadow-md' 
+                  : 'hover:bg-gray-700 text-gray-300'
               }`}
             >
-              <span className="ml-3">{item.icon}</span>
-              <span>{item.name}</span>
+              <item.icon className="h-5 w-5 rtl:ml-3 ltr:mr-3" />
+              <span className="font-medium">{item.name}</span>
             </Link>
-          );
-        })}
-      </nav>
+          </li>
+        ))}
+      </ul>
 
-      <div className="absolute bottom-0 w-64 p-4 border-t">
+      <div className="mt-10 pt-4 border-t border-gray-700">
         <button
-          onClick={logout}
-          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+          onClick={handleLogout}
+          className="w-full flex items-center p-3 rounded-lg text-red-400 hover:bg-gray-700 transition-colors duration-200"
         >
-          <span className="ml-3">🚪</span>
-          <span>تسجيل الخروج</span>
+          <LogOut className="h-5 w-5 rtl:ml-3 ltr:mr-3" />
+          <span className="font-medium">تسجيل الخروج</span>
         </button>
       </div>
-    </div>
+    </nav>
   );
-}
+};
+
+export default Sidebar;
