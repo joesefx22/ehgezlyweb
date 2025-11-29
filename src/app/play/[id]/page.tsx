@@ -296,3 +296,179 @@ export default function MatchDetails({ params }) {
     </div>
   );
 }
+
+// src/app/play/[id]/page.tsx
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { MapPin, Calendar, Users, User, Phone, MessageCircle } from "lucide-react";
+
+export default function PlayDetailsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params?.id;
+  const [match, setMatch] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/matches/${id}`)
+      .then(res => res.json())
+      .then(j => {
+        if (j?.ok) setMatch(j.data);
+        else setMatch(null);
+      })
+      .catch(err => { console.error(err); setMatch(null); })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const handleJoin = async () => {
+    if (!match) return;
+    if (!confirm("هل أنت متأكد أنك تريد الانضمام إلى هذا الطلب؟")) return;
+    setJoining(true);
+    try {
+      const res = await fetch("/api/matches/join", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ matchId: match.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        alert("تم الانضمام بنجاح");
+        // refresh match
+        const r2 = await fetch(`/api/matches/${id}`);
+        const j2 = await r2.json();
+        if (j2?.ok) setMatch(j2.data);
+      } else {
+        alert(data.error || "حدث خطأ أثناء الانضمام");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ");
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-[40vh] flex items-center justify-center text-zinc-300">جاري تحميل التفاصيل...</div>;
+  }
+
+  if (!match) {
+    return <div className="min-h-[40vh] flex items-center justify-center text-red-400">عذرًا، لم يتم العثور على الطلب</div>;
+  }
+
+  const playersCount = match.participants?.length || 0;
+  const spotsLeft = Math.max(match.playersNeeded - playersCount, 0);
+
+  return (
+    <main className="min-h-screen p-6 bg-gradient-to-b from-[#041225] to-[#021018]">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="max-w-5xl mx-auto">
+        <header className="mb-6">
+          <h1 className="text-4xl font-bold text-white">{match.title || `مباراة في ${match.area}`}</h1>
+          <p className="text-zinc-400 mt-1">منشئ الطلب: {match.creator?.name || "مستخدم"}</p>
+        </header>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <section className="md:col-span-2 space-y-6">
+            <Card className="p-6">
+              <div className="flex items-start gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 text-zinc-200 mb-3">
+                    <MapPin /><span className="font-medium">المنطقة</span> <span className="text-zinc-400 ml-2">{match.area}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-zinc-200 mb-3">
+                    <Calendar /><span className="font-medium">التاريخ والوقت</span> <span className="text-zinc-400 ml-2">{new Date(match.date).toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-zinc-200 mb-3">
+                    <Users /><span className="font-medium">المستوى</span> <span className="text-zinc-400 ml-2">{match.level}</span>
+                  </div>
+
+                  <div className="mt-4 text-zinc-300 leading-relaxed">
+                    <h3 className="font-semibold text-white mb-2">تفاصيل الطلب</h3>
+                    <p>{match.description || "لا توجد ملاحظات إضافية"}</p>
+                  </div>
+                </div>
+
+                <aside className="w-44">
+                  <div className="text-sm text-zinc-400">المنشئ</div>
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-zinc-800">
+                      <img src={match.creator?.avatarUrl || "/icons/icon-192x192.png"} alt="creator" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">{match.creator?.name || "مستخدم"}</div>
+                      <div className="text-xs text-zinc-400">المنشئ</div>
+                    </div>
+                  </div>
+                  <div className="mt-6 text-sm text-zinc-400">
+                    <div>الانضمام: <span className="text-white font-medium">{playersCount}/{match.playersNeeded}</span></div>
+                    <div className="mt-2">متبقي: <span className="text-amber-400 font-semibold">{spotsLeft}</span></div>
+                  </div>
+                </aside>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold text-white mb-4">قائمة المنضمين</h3>
+              <div className="space-y-3">
+                {match.participants && match.participants.length > 0 ? match.participants.map((p:any) => (
+                  <div key={p.id} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-zinc-800"><img src={p.user?.avatarUrl || "/icons/icon-192x192.png"} alt="" className="w-full h-full object-cover" /></div>
+                    <div>
+                      <div className="font-medium text-white">{p.user?.name || p.user?.email}</div>
+                      <div className="text-xs text-zinc-400">{new Date(p.joinedAt).toLocaleString()}</div>
+                    </div>
+                  </div>
+                )) : <div className="text-zinc-400">لا يوجد منضمين حتى الآن</div>}
+              </div>
+            </Card>
+          </section>
+
+          <aside className="md:col-span-1 space-y-6">
+            <Card className="p-6 text-center">
+              <div className="text-sm text-zinc-400">مكان الحجز</div>
+              <div className="text-lg font-semibold text-white mt-2">{match.area}</div>
+
+              <div className="mt-4">
+                <div className="text-sm text-zinc-400">المتطلبات</div>
+                <div className="text-white font-medium mt-1">{match.playersNeeded} لاعب/لاعبين</div>
+              </div>
+
+              <div className="mt-6">
+                {match.status === "OPEN" ? (
+                  <Button onClick={handleJoin} disabled={joining || spotsLeft <= 0} className="w-full py-3 text-lg">
+                    {joining ? "جارٍ الانضمام..." : (spotsLeft > 0 ? "انضم الآن" : "اكتمل العدد")}
+                  </Button>
+                ) : (
+                  <div className="px-4 py-3 rounded-xl bg-zinc-800 text-zinc-400">الحالة: {match.status}</div>
+                )}
+              </div>
+
+              <div className="mt-4 text-xs text-zinc-400">
+                <div>للاستفسار: <a href={`tel:${match.creator?.phone || ""}`} className="text-emerald-400">{match.creator?.phone || "-"}</a></div>
+                <div className="mt-2">انقر انضم الآن للانضمام سريعًا</div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <h4 className="text-sm text-zinc-300">اختر إجراء</h4>
+              <div className="mt-3 space-y-2">
+                <button className="w-full btn-lux p-2">مراسلة المنشئ</button>
+                <button className="w-full bg-white/6 p-2 rounded-xl">إضافة لتذكيري</button>
+              </div>
+            </Card>
+          </aside>
+        </div>
+      </motion.div>
+    </main>
+  );
+}
