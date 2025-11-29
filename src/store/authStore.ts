@@ -54,3 +54,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 }));
+
+// src/store/authStore.ts (مقتطف)
+import { create } from "zustand";
+
+type User = { id: string; email: string; role?: string; name?: string } | null;
+
+type AuthState = {
+  user: User;
+  token?: string | null;
+  setUser: (u: User) => void;
+  setToken: (t: string | null) => void;
+};
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  token: null,
+  setUser: (u) => set({ user: u }),
+  setToken: (t) => set({ token: t }),
+}));
