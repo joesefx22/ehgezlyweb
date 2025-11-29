@@ -96,3 +96,126 @@ export default async function PlayDetails({ params }) {
     </div>
   );
 }
+
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  MapPin,
+  Calendar,
+  Users,
+  User,
+  Phone,
+  BadgeCheck,
+} from "lucide-react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+
+export default function PlayDetailsPage() {
+  const { id } = useParams();
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(`/api/play/${id}`);
+      const json = await res.json();
+      setData(json.data);
+    }
+    if (id) load();
+  }, [id]);
+
+  if (!data)
+    return (
+      <div className="text-center py-40 text-zinc-300 text-xl">
+        جاري تحميل التفاصيل...
+      </div>
+    );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="max-w-5xl mx-auto px-6 py-12"
+    >
+      {/* Header Title */}
+      <div className="mb-10">
+        <motion.h1
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-4xl font-bold text-white"
+        >
+          مباراة في {data.area}
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="text-zinc-300 mt-3 leading-relaxed"
+        >
+          تفاصيل كاملة عن طلب اللعب 👇
+        </motion.p>
+      </div>
+
+      {/* Main Card */}
+      <Card className="p-8 bg-white/5 backdrop-blur-xl shadow-lux-2 border border-white/10 rounded-2xl">
+        <div className="grid md:grid-cols-2 gap-10">
+          {/* Left Side */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 text-zinc-200">
+              <User size={20} className="text-emerald-400" />
+              <span>الاسم: {data.name}</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-zinc-200">
+              <Phone size={20} className="text-sky-400" />
+              <span>رقم الموبايل: {data.phone}</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-zinc-200">
+              <MapPin size={20} className="text-rose-400" />
+              <span>المنطقة: {data.area}</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-zinc-200">
+              <Calendar size={20} className="text-amber-400" />
+              <span>التاريخ: {data.date}</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-zinc-200">
+              <Users size={20} className="text-purple-400" />
+              <span>
+                عدد اللاعبين المطلوبين: {data.players}
+              </span>
+            </div>
+
+            <div className="text-zinc-300 leading-relaxed">
+              <b>ملاحظات:</b>  
+              <br />
+              {data.description}
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="flex flex-col justify-center">
+            <div className="mb-6">
+              <div className="text-zinc-400 text-sm mb-2">مستوى اللعب</div>
+              <div className="flex items-center gap-2 text-xl font-semibold text-white">
+                <BadgeCheck className="text-green-400" />
+                {data.level}
+              </div>
+            </div>
+
+            <Button className="w-full py-4 text-lg rounded-xl shadow-xl hover:scale-[1.02] transition-all">
+              انضم الآن
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
