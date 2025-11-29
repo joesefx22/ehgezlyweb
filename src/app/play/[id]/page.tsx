@@ -69,3 +69,30 @@ export default function PlayDetailsPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
+
+async function getData(id: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/plays/${id}`);
+  return res.json();
+}
+
+export default async function PlayDetails({ params }) {
+  const data = await getData(params.id);
+
+  return (
+    <div className="p-10">
+      <h1 className="text-4xl font-bold mb-4">{data.title}</h1>
+
+      <div className="space-y-3 text-gray-700">
+        <p>📅 التاريخ: {data.date}</p>
+        <p>📍 المنطقة: {data.region}</p>
+        <p>⚽ المستوى: {data.level}</p>
+        <p>⏳ الوقت: {data.time}</p>
+        <p>💰 السعر: {data.price} جنيه</p>
+      </div>
+
+      <button className="mt-6 px-8 py-3 rounded-xl bg-black text-white">
+        احجز الماتش
+      </button>
+    </div>
+  );
+}
