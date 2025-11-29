@@ -68,3 +68,31 @@ export default function RootLayout({ children }: RootLayoutProps) {
     </html>
   );
 }
+
+// src/app/layout.tsx
+import "./styles/globals.css";
+import React from "react";
+import { Inter } from "next/font/google";
+import SiteHeader from "@/components/ui/SiteHeader";
+import SiteFooter from "@/components/ui/SiteFooter";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+export const metadata = {
+  title: "Ehgezly — احجزلي",
+  description: "منصة حجز ملاعب وماتشات بتجربة فاخره"
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ar" className={`${inter.variable} scroll-smooth`}>
+      <body>
+        <div className="min-h-screen flex flex-col">
+          <SiteHeader />
+          <main className="flex-1 w-full">{children}</main>
+          <SiteFooter />
+        </div>
+      </body>
+    </html>
+  );
+}
