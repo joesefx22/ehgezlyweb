@@ -34,3 +34,41 @@ export async function GET(req: Request) {
     );
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    const {
+      userId,
+      playerName,
+      area,
+      level,
+      date,
+      needed,
+      notes,
+      phone,
+    } = body;
+
+    const newRequest = await prisma.playRequest.create({
+      data: {
+        userId,
+        playerName,
+        area,
+        level,
+        date: new Date(date),
+        needed,
+        notes,
+        phone,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: newRequest });
+  } catch (err) {
+    console.log(err);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
+    );
+  }
+}
