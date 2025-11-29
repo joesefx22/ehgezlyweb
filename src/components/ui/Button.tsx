@@ -47,5 +47,17 @@ const Button: React.FC<ButtonProps> = ({
     </button>
   );
 };
-
 export default Button;
+
+// src/components/ui/Button.tsx
+"use client";
+import React from "react";
+import clsx from "clsx";
+
+export default function Button({ children, className, ...props }: any) {
+  return (
+    <button {...props} className={clsx("btn-lux bg-gradient-to-br from-[#06b6d4] to-[#7c3aed] text-white", className)}>
+      {children}
+    </button>
+  );
+}
