@@ -1,3 +1,40 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function PUT(req) {
+  try {
+    const body = await req.json();
+
+    const { playerId, name, age, level, area, phone, avatar } = body;
+
+    if (!playerId)
+      return NextResponse.json(
+        { error: "playerId is required" },
+        { status: 400 }
+      );
+
+    const updated = await prisma.player.update({
+      where: { id: Number(playerId) },
+      data: {
+        name,
+        age,
+        level,
+        area,
+        phone,
+        avatar,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: "Error updating profile" },
+      { status: 500 }
+    );
+  }
+}
+
 // src/app/api/player/profile/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
