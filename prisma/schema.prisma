@@ -46,3 +46,30 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model MatchRequest {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  location    String
+  pitchId     String?    // إذا عندك جدول للملاعب، اربط هنا
+  date        DateTime
+  timeSlot    String?    // مثلاً "18:00-19:00"
+  playersNeeded Int     @default(1) // عدد اللاعبين المطلوبين
+  creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId   String
+  createdAt   DateTime @default(now())
+  status      String   @default("OPEN") // OPEN / FULL / CLOSED
+  participants Participation[]
+}
+
+model Participation {
+  id         String @id @default(cuid())
+  match      MatchRequest @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId    String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  joinedAt   DateTime @default(now())
+  // role in match maybe: PLAYER / SUBSTITUTE
+  role       String? 
+}
