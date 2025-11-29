@@ -1,3 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export default function PlayerDashboard() {
+  const [matches, setMatches] = useState([]);
+  const [filters, setFilters] = useState({
+    date: "",
+    level: "",
+    area: "",
+  });
+
+  const fetchMatches = async () => {
+    const query = new URLSearchParams(filters).toString();
+    const res = await fetch(`/api/matches?${query}`);
+    const data = await res.json();
+    setMatches(data);
+  };
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
+      
+      {/* عنوان فاخر */}
+      <h1 className="text-4xl font-semibold text-white drop-shadow-lg">
+        الماتشات المتاحة 🔥
+      </h1>
+
+      {/* فلتر فاخر */}
+      <Card className="p-5 bg-black/40 backdrop-blur-lg border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* التاريخ */}
+          <input
+            type="date"
+            className="bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+            onChange={(e) =>
+              setFilters({ ...filters, date: e.target.value })
+            }
+          />
+
+          {/* مستوى اللاعبين */}
+          <select
+            className="bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+            onChange={(e) =>
+              setFilters({ ...filters, level: e.target.value })
+            }
+          >
+            <option value="">مستوى اللاعبين</option>
+            <option value="beginner">مبتدئ</option>
+            <option value="intermediate">متوسط</option>
+            <option value="pro">محترف</option>
+          </select>
+
+          {/* المنطقة */}
+          <input
+            type="text"
+            placeholder="المنطقة"
+            className="bg-black/30 border border-white/10 rounded-xl p-3 text-white"
+            onChange={(e) =>
+              setFilters({ ...filters, area: e.target.value })
+            }
+          />
+        </div>
+
+        <Button
+          className="mt-4 w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl p-4 text-lg shadow-lg hover:opacity-90"
+          onClick={fetchMatches}
+        >
+          تطبيق الفلتر
+        </Button>
+      </Card>
+
+      {/* عرض الماتشات */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {matches.map((match) => (
+          <motion.div
+            key={match.id}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="p-5 bg-black/50 border-white/10 rounded-2xl shadow-xl">
+              <h2 className="text-xl text-white font-bold">{match.title}</h2>
+              <p className="text-white/70 mt-2">📅 التاريخ: {match.date}</p>
+              <p className="text-white/70">📍 المنطقة: {match.area}</p>
+              <p className="text-white/70">🔥 المستوى: {match.level}</p>
+
+              <a href={`/play/${match.id}`}>
+                <Button className="mt-4 w-full bg-emerald-500 text-black font-semibold p-3 rounded-xl">
+                  عرض التفاصيل
+                </Button>
+              </a>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // src/app/player/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
