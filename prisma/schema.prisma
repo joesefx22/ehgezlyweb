@@ -73,3 +73,18 @@ model Participation {
   // role in match maybe: PLAYER / SUBSTITUTE
   role       String? 
 }
+
+model PlayRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  playerName  String
+  area        String
+  level       String
+  date        DateTime
+  needed      Int
+  notes       String?
+  phone       String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
