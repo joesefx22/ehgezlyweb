@@ -1,3 +1,32 @@
+import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth";
+
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const requests = await prisma.playerRequest.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json({ requests }, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
+  }
+}
+
 // src/app/api/player-requests/route.ts
 import { NextResponse } from "next/server";
 import { withTransaction } from "@/lib/db";
