@@ -26,4 +26,12 @@ const Card: React.FC<CardProps> = ({ className, title, children, ...props }) => 
   );
 };
 
+// src/components/ui/Card.tsx
+import React from "react";
+import clsx from "clsx";
+
+export default function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={clsx("lux-card p-6", className)}>{children}</div>;
+}
+
 export default Card;
