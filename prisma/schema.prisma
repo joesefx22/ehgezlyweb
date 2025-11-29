@@ -200,3 +200,18 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model PlayRequest {
+  id            String   @id @default(cuid())
+  title         String?
+  description   String?
+  area          String
+  level         String
+  date          DateTime
+  playersNeeded Int
+  status        String   @default("OPEN")
+  creatorId     String
+  creator       User     @relation(fields: [creatorId], references: [id])
+  participants  Participation[]
+  createdAt     DateTime @default(now())
+}
