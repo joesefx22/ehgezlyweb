@@ -140,3 +140,63 @@ model Notification {
 
   user      User     @relation(fields: [userId], references: [id])
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("PLAYER")
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  sessions  Session[]
+  // relations
+  matchRequests MatchRequest[] @relation("creator")
+  participations Participation[]
+  notifications Notification[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model MatchRequest {
+  id            String   @id @default(cuid())
+  title         String?
+  description   String?
+  area          String
+  level         String
+  date          DateTime
+  playersNeeded Int
+  status        String   @default("OPEN") // OPEN / FULL / CANCELLED / PLAYED
+  creatorId     String
+  creator       User     @relation(fields: [creatorId], references: [id], name: "creator")
+  participants  Participation[]
+  createdAt     DateTime @default(now())
+}
+
+model Participation {
+  id        String      @id @default(cuid())
+  matchId   String
+  match     MatchRequest @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime    @default(now())
+  role      String?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String?
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
