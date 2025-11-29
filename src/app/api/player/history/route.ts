@@ -35,3 +35,34 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "server error" }, { status: 500 });
   }
 }
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const playerId = searchParams.get("playerId");
+
+    if (!playerId)
+      return NextResponse.json(
+        { error: "playerId is required" },
+        { status: 400 }
+      );
+
+    const history = await prisma.matchHistory.findMany({
+      where: { playerId: Number(playerId) },
+      include: {
+        match: true,
+      },
+      orderBy: { date: "desc" },
+    });
+
+    return NextResponse.json(history);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: "Error fetching history" },
+      { status: 500 }
+    );
+  }
+}
