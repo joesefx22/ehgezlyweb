@@ -1,3 +1,20 @@
+// at top:
+import { useAuthStore } from "@/store/authStore";
+const currentUser = useAuthStore(state => state.user);
+
+// inside component:
+const isCreator = request.creatorId === currentUser?.id;
+const isParticipant = (joined && joined.userId === currentUser?.id) || (request.participants?.some((p:any) => p.userId === currentUser?.id));
+
+{/* Render */}
+{isCreator ? (
+  <Button onClick={doCancel} className="px-3 py-2 bg-rose-600">إلغاء</Button>
+) : isParticipant ? (
+  <Button onClick={doLeave} className="px-3 py-2 bg-amber-500">مغادرة</Button>
+) : (
+  <a href={`/play/${request.id}`}><Button className="px-3 py-2 bg-emerald-500">عرض والانضمام</Button></a>
+)}
+
 // src/components/player/RequestCard.tsx
 "use client";
 import React, { useState } from "react";
