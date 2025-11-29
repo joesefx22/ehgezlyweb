@@ -211,3 +211,24 @@ export default function PlayerDashboardPage() {
     </main>
   );
 }
+
+// ... أعلى الملف import statements
+import { useState } from "react";
+import CreateRequestModal from "@/components/player/CreateRequestModal";
+import ModalWrapper from "@/components/ui/ModalWrapper"; // سنضيف هذا أدناه
+
+export default function PlayerDashboardPage() {
+  // existing states...
+  const [showCreate, setShowCreate] = useState(false);
+
+  // in render: زر إنشاء يفتح المودال
+  // تعديل الزر:
+  // <Button onClick={() => setShowCreate(true)}>انشر طلب جديد</Button>
+
+  // وأضف هذا الجزء أسفل الصفحة (داخل JSX root)
+  {showCreate && (
+    <ModalWrapper onClose={() => setShowCreate(false)}>
+      <CreateRequestModal onCreated={() => { setShowCreate(false); loadAll(); }} onClose={() => setShowCreate(false)} />
+    </ModalWrapper>
+  )}
+}
