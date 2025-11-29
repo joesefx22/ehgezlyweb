@@ -219,3 +219,80 @@ export default function PlayDetailsPage() {
     </motion.div>
   );
 }
+
+// src/app/play/[id]/page.jsx
+
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
+export default function MatchDetails({ params }) {
+  const { id } = params;
+  const [match, setMatch] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMatch() {
+      try {
+        const res = await fetch(`/api/matches/${id}`);
+        const data = await res.json();
+        setMatch(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMatch();
+  }, [id]);
+
+  if (loading) {
+    return <div className="text-center py-10 text-lg">Loading match details...</div>;
+  }
+
+  if (!match) {
+    return <div className="text-center py-10 text-red-600">Match not found.</div>;
+  }
+
+  return (
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center">Match Details</h1>
+
+      <Card className="shadow-xl rounded-2xl p-4">
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-semibold text-xl">Location</h2>
+              <p>{match.location}</p>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-xl">Date & Time</h2>
+              <p>{new Date(match.date).toLocaleString()}</p>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-xl">Players Needed</h2>
+              <p>{match.playersNeeded}</p>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-xl">Skill Level</h2>
+              <p>{match.level}</p>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-xl">Description</h2>
+              <p>{match.description}</p>
+            </div>
+
+            <Button className="w-full mt-6 text-lg py-6 rounded-xl">
+              Join Match
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
