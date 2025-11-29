@@ -1,3 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import { Calendar, MapPin, Filter, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectItem, SelectContent, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+
+export default function PlayPage() {
+  const [filters, setFilters] = useState({
+    date: null,
+    area: "",
+    level: "",
+  });
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+
+      {/* FILTER CARD */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-6 rounded-2xl backdrop-blur-xl bg-white/10 shadow-xl border border-white/20"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <Filter className="text-white w-6 h-6" />
+          <h2 className="text-xl font-semibold text-white">فلتر البحث المتقدم</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* DATE FILTER */}
+          <div className="space-y-2">
+            <label className="text-white text-sm flex items-center gap-2">
+              <Calendar size={16} /> التاريخ
+            </label>
+            <DatePicker
+              selected={filters.date}
+              onSelect={(val) => setFilters({ ...filters, date: val })}
+              placeholder="اختر التاريخ"
+              className="w-full"
+            />
+          </div>
+
+          {/* AREA FILTER */}
+          <div className="space-y-2">
+            <label className="text-white text-sm flex items-center gap-2">
+              <MapPin size={16} /> المنطقة
+            </label>
+            <Select
+              onValueChange={(value) => setFilters({ ...filters, area: value })}
+            >
+              <SelectTrigger className="bg-white/10 text-white backdrop-blur-lg border-white/20">
+                <SelectValue placeholder="اختر المنطقة" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="nasr-city">مدينة نصر</SelectItem>
+                <SelectItem value="heliopolis">مصر الجديدة</SelectItem>
+                <SelectItem value="maadi">المعادي</SelectItem>
+                <SelectItem value="dokki">الدقي</SelectItem>
+                <SelectItem value="giza">الجيزة</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* LEVEL FILTER */}
+          <div className="space-y-2">
+            <label className="text-white text-sm flex items-center gap-2">
+              <Users size={16} /> مستوى اللاعبين
+            </label>
+            <Select
+              onValueChange={(value) => setFilters({ ...filters, level: value })}
+            >
+              <SelectTrigger className="bg-white/10 text-white backdrop-blur-lg border-white/20">
+                <SelectValue placeholder="اختر المستوى" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="beginner">مبتدئ</SelectItem>
+                <SelectItem value="intermediate">متوسط</SelectItem>
+                <SelectItem value="advanced">متقدم</SelectItem>
+                <SelectItem value="pro">محترف</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl shadow-lg">
+            تطبيق الفلتر
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // src/app/play/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
