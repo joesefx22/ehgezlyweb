@@ -48,3 +48,18 @@ export const getDashboardPath = (role: UserRole): string => {
             return '/dashboard';
     }
 };
+
+مسار: src/lib/auth.ts (نفس الملف الموجود عندك — سنبدّل أي استيراد مباشر من @prisma/client ليشير إلى @/lib/prisma)
+
+ابحث في src/lib/auth.ts عن أي سطر يشبه:
+
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+
+واستبدله بـ:
+
+import prisma from "@/lib/prisma";
+
+
+إذا الملف يستعمل UserRole من @/types فده تمام؛ مجرد تأكد إن كل الأماكن اللي تُنشئ PrismaClient تم حذفها واستُبدلت بالإستيراد الموحد أعلاه.
