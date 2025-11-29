@@ -78,3 +78,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "server error" }, { status: 500 });
   }
 }
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const date = searchParams.get("date");
+    const level = searchParams.get("level");
+    const area = searchParams.get("area");
+
+    let filters = {};
+
+    if (date) filters.date = date;
+    if (level) filters.level = level;
+    if (area) filters.area = area;
+
+    const matches = await prisma.match.findMany({
+      where: filters,
+      orderBy: { date: "asc" },
+    });
+
+    return NextResponse.json(matches);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
+}
