@@ -25,3 +25,28 @@ export async function GET(
     );
   }
 }
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function GET(req: Request, context: { params: { id: string } }) {
+  try {
+    const id = context.params.id;
+
+    const match = await prisma.playRequest.findUnique({
+      where: { id },
+      include: {
+        owner: true,
+        players: true,
+      },
+    });
+
+    if (!match) {
+      return NextResponse.json({ error: "Match not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(match);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
