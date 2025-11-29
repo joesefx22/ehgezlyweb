@@ -88,3 +88,45 @@ model PlayRequest {
 
   user        User     @relation(fields: [userId], references: [id])
 }
+
+// prisma/schema.prisma (أضف/تأكد)
+model PlayRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String?    // اسم منشئ الطلب إن أردت
+  playerName  String
+  area        String
+  level       String
+  date        DateTime
+  needed      Int
+  description String?
+  phone       String
+  status      String   @default("OPEN") // OPEN / FULL / CANCELLED / PLAYED
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  participants Participation[]
+}
+
+model Participation {
+  id         String @id @default(cuid())
+  matchId    String
+  userId     String
+  joinedAt   DateTime @default(now())
+  role       String?  // PLAYER / SUBSTITUTE
+  // relations
+  match      PlayRequest @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  link      String?   // optional link to UI e.g. /play/<id>
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
