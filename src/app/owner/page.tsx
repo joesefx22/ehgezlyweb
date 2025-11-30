@@ -265,3 +265,135 @@ export default function OwnerPage() {
     </div>
   );
 }
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+
+export default function OwnerDashboard() {
+  const { toast } = useToast();
+
+  const [stadiums, setStadiums] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [form, setForm] = useState({
+    name: "",
+    price: "",
+    location: "",
+    size: "",
+  });
+
+  useEffect(() => {
+    fetchStadiums();
+  }, []);
+
+  async function fetchStadiums() {
+    try {
+      const res = await axios.get("/api/stadium/owner");
+      setStadiums(res.data);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to load stadiums",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addStadium() {
+    try {
+      await axios.post("/api/stadium/create", form);
+
+      toast({
+        title: "Success",
+        description: "Stadium created successfully",
+      });
+
+      setForm({ name: "", price: "", location: "", size: "" });
+      fetchStadiums();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to add stadium",
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <div className="p-6">
+
+      <h1 className="text-3xl font-bold mb-6">لوحة تحكم صاحب الملعب</h1>
+
+      {/* إضافة ملعب */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>إضافة ملعب جديد</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+          <Input
+            placeholder="اسم الملعب"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+
+          <Input
+            placeholder="السعر"
+            value={form.price}
+            onChange={(e) => setForm({ ...form, price: e.target.value })}
+          />
+
+          <Input
+            placeholder="الموقع"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
+
+          <Input
+            placeholder="المساحة"
+            value={form.size}
+            onChange={(e) => setForm({ ...form, size: e.target.value })}
+          />
+
+          <Button className="col-span-1" onClick={addStadium}>
+            إضافة
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* عرض الملاعب */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {stadiums.map((st) => (
+          <Card key={st.id}>
+            <CardHeader>
+              <CardTitle>{st.name}</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <p>💲 السعر: {st.price}</p>
+              <p>📍 الموقع: {st.location}</p>
+              <p>📏 الحجم: {st.size}</p>
+
+              <Button
+                className="mt-4 w-full"
+                variant="secondary"
+                onClick={() => alert("فتح صفحة الملعب للتعديل")}
+              >
+                إدارة الملعب
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {loading && <p className="mt-6 text-center">جاري التحميل...</p>}
+    </div>
+  );
+}
