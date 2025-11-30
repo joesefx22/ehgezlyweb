@@ -36,3 +36,20 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/dashboard/:path*", "/api/:path*"]
 };
+
+// src/middleware/rateLimit.ts
+const MAP = new Map<string, { tokens: number, last: number }>();
+export function allowRate(key: string, limit = 10, perSeconds = 60) {
+  const now = Date.now();
+  const rec = MAP.get(key) || { tokens: limit, last: now };
+  const elapsed = (now - rec.last) / 1000;
+  rec.tokens = Math.min(limit, rec.tokens + elapsed * (limit / perSeconds));
+  rec.last = now;
+  if (rec.tokens >= 1) {
+    rec.tokens -= 1;
+    MAP.set(key, rec);
+    return true;
+  }
+  MAP.set(key, rec);
+  return false;
+}
