@@ -300,3 +300,10 @@ model Booking {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model StadiumImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  stadiumId Int
+  stadium   Stadium  @relation(fields: [stadiumId], references: [id])
+}
