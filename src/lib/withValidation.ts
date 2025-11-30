@@ -6,7 +6,7 @@ export async function withValidation(req: Request, schema: z.ZodTypeAny) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     const err = parsed.error.flatten();
-    throw { status: 400, issues: err };
+    return { ok: false, status: 400, issues: err };
   }
-  return parsed.data;
+  return { ok: true, data: parsed.data };
 }
