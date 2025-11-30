@@ -175,3 +175,93 @@ export default function OwnerPage() {
     </div>
   );
 }
+// src/app/owner/page.tsx
+"use client";
+import React, { useEffect, useState } from "react";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import FieldForm from "@/components/owner/FieldForm";
+import FieldCard from "@/components/owner/FieldCard";
+import { useToast } from "@/components/ui/toast";
+
+export default function OwnerPage() {
+  const [fields, setFields] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const toast = useToast();
+
+  async function loadFields() {
+    const res = await fetch("/api/owner/fields");
+    const data = await res.json();
+    if (res.ok && data.ok) setFields(data.data);
+    else toast.show(data.error || "خطأ في تحميل الملاعب", "error");
+  }
+
+  async function loadBookings() {
+    const res = await fetch("/api/owner/bookings");
+    const data = await res.json();
+    if (res.ok && data.ok) setBookings(data.data);
+    else toast.show(data.error || "خطأ في تحميل الحجوزات", "error");
+  }
+
+  useEffect(() => { loadFields(); loadBookings(); }, []);
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">لوحة التحكم - صاحب الملعب</h1>
+        <Button onClick={() => setShowCreate(true)}>إضافة ملعب جديد</Button>
+      </div>
+
+      {showCreate && (
+        <div className="mb-6">
+          <Card className="p-4">
+            <FieldForm
+              onSaved={() => { setShowCreate(false); loadFields(); toast.show("تم إنشاء الملعب", "success"); }}
+              onCancel={() => setShowCreate(false)}
+            />
+          </Card>
+        </div>
+      )}
+
+      <section className="mb-8">
+        <h2 className="text-xl font-medium mb-3">ملاعبك</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {fields.length === 0 ? <div className="text-zinc-400">لا توجد ملاعب بعد</div> : fields.map(f => (
+            <FieldCard key={f.id} field={f} onDeleted={() => loadFields()} onUpdated={() => loadFields()} />
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-medium mb-3">الحجوزات الأخيرة</h2>
+        <div className="space-y-3">
+          {bookings.length === 0 && <div className="text-zinc-400">لا توجد حجوزات</div>}
+          {bookings.map(b => (
+            <Card key={b.id} className="flex items-center justify-between p-4">
+              <div>
+                <div className="font-semibold">{b.field?.title}</div>
+                <div className="text-sm text-zinc-400">{new Date(b.startAt).toLocaleString()} — {b.user?.name || b.userId}</div>
+                <div className="text-sm mt-1">حالة: {b.status}</div>
+              </div>
+              <div className="flex gap-2">
+                {b.status === "PENDING" && <Button onClick={async ()=>{
+                  const res = await fetch(`/api/owner/bookings/${b.id}/confirm`, { method: "POST" });
+                  const d = await res.json();
+                  if (res.ok && d.ok) { toast.show("تم تأكيد الحجز", "success"); loadBookings(); }
+                  else toast.show(d.error || "خطأ", "error");
+                }}>تأكيد</Button>}
+                {b.status !== "CANCELLED" && <Button onClick={async ()=>{
+                  const res = await fetch(`/api/owner/bookings/${b.id}/cancel`, { method: "POST" });
+                  const d = await res.json();
+                  if (res.ok && d.ok) { toast.show("تم إلغاء الحجز", "success"); loadBookings(); }
+                  else toast.show(d.error || "خطأ", "error");
+                }}>إلغاء</Button>}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
