@@ -215,3 +215,46 @@ model PlayRequest {
   participants  Participation[]
   createdAt     DateTime @default(now())
 }
+
+model Field {
+  id          String      @id @default(cuid())
+  ownerId     String
+  owner       User        @relation(fields: [ownerId], references: [id])
+  title       String
+  description String?
+  address     String
+  city        String?
+  lat         Float?
+  lng         Float?
+  // price per hour in cents
+  priceCents  Int         @default(0)
+  active      Boolean     @default(true)
+  images      FieldImage[]
+  bookings    Booking[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model FieldImage {
+  id       String   @id @default(cuid())
+  fieldId  String
+  field    Field    @relation(fields: [fieldId], references: [id])
+  url      String
+  alt      String?
+  order    Int      @default(0)
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  fieldId         String
+  field           Field    @relation(fields: [fieldId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  startAt         DateTime
+  endAt           DateTime
+  totalCents      Int
+  status          String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, PAID, PAYMENT_FAILED
+  externalOrderId String?  // for payment gateway
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
