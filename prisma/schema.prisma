@@ -307,3 +307,13 @@ model StadiumImage {
   stadiumId Int
   stadium   Stadium  @relation(fields: [stadiumId], references: [id])
 }
+
+model Slot {
+  id        Int      @id @default(autoincrement())
+  startTime String
+  endTime   String
+  price     Int
+  days      String[]
+  stadiumId Int
+  stadium   Stadium @relation(fields: [stadiumId], references: [id])
+}
