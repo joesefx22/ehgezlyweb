@@ -1,3 +1,75 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import CreateCodeModal from "@/components/admin/CreateCodeModal";
+import { useToast } from "@/components/ui/use-toast";
+
+export default function AdminCodesPage() {
+  const [codes, setCodes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const toast = useToast();
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/codes");
+      const j = await res.json();
+      if (res.ok && j.ok) setCodes(j.data);
+      else toast.show(j.error || "خطأ", "error");
+    } catch (err) { console.error(err); toast.show("خطأ","error"); }
+    finally { setLoading(false); }
+  }
+
+  useEffect(()=>{ load(); }, []);
+
+  async function toggleActive(id: string, current: boolean) {
+    const res = await fetch(`/api/admin/codes/${id}`, { method: "PUT", headers: { "content-type":"application/json" }, body: JSON.stringify({ isActive: !current }) });
+    const j = await res.json();
+    if (res.ok && j.ok) { toast.show("تم التعديل","success"); load(); } else toast.show(j.error || "خطأ","error");
+  }
+
+  async function doDelete(id:string) {
+    if (!confirm("حذف الكود نهائيًا؟")) return;
+    const res = await fetch(`/api/admin/codes/${id}`, { method: "DELETE" });
+    const j = await res.json();
+    if (res.ok && j.ok) { toast.show("تم الحذف","success"); load(); } else toast.show(j.error || "خطأ","error");
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">إدارة الأكواد</h1>
+        <div className="flex gap-2">
+          <Button onClick={()=> setShowCreate(true)}>إنشاء كود جديد</Button>
+          <a href="/api/admin/code-usages?export=1"><Button variant="secondary">تصدير استخدامات CSV</Button></a>
+        </div>
+      </div>
+
+      {showCreate && <div className="mb-4"><Card className="p-4"><CreateCodeModal onCreated={()=>{ setShowCreate(false); load(); }} onCancel={()=>setShowCreate(false)} /></Card></div>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {codes.map(c => (
+          <Card key={c.id} className="p-4 flex justify-between items-center">
+            <div>
+              <div className="font-semibold">{c.code} <span className="text-sm text-zinc-400">({c.type})</span></div>
+              <div className="text-sm text-zinc-500">استخدم: {c.usedCount}/{c.maxUsage} — ينتهي: {c.expiresAt ? new Date(c.expiresAt).toLocaleString() : "غير محدد"}</div>
+              <div className="text-sm text-zinc-400 mt-1">قيمة: {c.percent ? `${c.percent}%` : (c.amount ? `${c.amount}` : "-")}</div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button onClick={()=> toggleActive(c.id, c.isActive)}>{c.isActive ? "تعطيل" : "تفعيل"}</Button>
+              <Button className="bg-rose-600" onClick={()=> doDelete(c.id)}>حذف</Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {loading && <div className="mt-4">جاري التحميل...</div>}
+    </div>
+  );
+}
+
 'use client';
 
 import DashboardLayout from '@/components/dashboard/Layout';
