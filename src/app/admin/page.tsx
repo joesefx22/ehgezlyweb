@@ -113,3 +113,78 @@ const AdminDashboardPage: React.FC = () => {
 };
 
 export default AdminDashboardPage;
+
+"use client";
+import React, { useEffect, useState } from "react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/toast";
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const toast = useToast();
+
+  async function load() {
+    try {
+      const res = await fetch("/api/admin/stats");
+      const j = await res.json();
+      if (res.ok && j.ok) setStats(j.data);
+      else toast.show(j.error || "خطأ","error");
+
+      const ru = await fetch("/api/admin/users");
+      const uj = await ru.json();
+      if (ru.ok && uj.ok) setUsers(uj.data);
+    } catch (err) {
+      console.error(err);
+      toast.show("خطأ","error");
+    }
+  }
+
+  useEffect(()=>{ load(); }, []);
+
+  if (!stats) return <div className="p-6">جاري التحميل...</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-4">لوحة الأدمن</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card className="p-4"><div className="text-sm">المستخدمين</div><div className="text-xl font-bold">{stats.usersCount}</div></Card>
+        <Card className="p-4"><div className="text-sm">الملاعب</div><div className="text-xl font-bold">{stats.stadiumsCount}</div></Card>
+        <Card className="p-4"><div className="text-sm">الحجوزات</div><div className="text-xl font-bold">{stats.bookingsCount}</div></Card>
+        <Card className="p-4"><div className="text-sm">الإيرادات</div><div className="text-xl font-bold">{(stats.income/100).toFixed(2)} EGP</div></Card>
+      </div>
+
+      <section>
+        <h2 className="text-lg font-medium mb-3">المستخدمين</h2>
+        <div className="space-y-3">
+          {users.map(u => (
+            <Card key={u.id} className="p-3 flex justify-between items-center">
+              <div>
+                <div className="font-semibold">{u.name || u.email}</div>
+                <div className="text-sm text-zinc-400">{u.role} {u.banned ? "— BANNED" : ""}</div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={async ()=> {
+                  const res = await fetch(`/api/admin/users/${u.id}`, { method: "PUT", headers: { "content-type":"application/json" }, body: JSON.stringify({ banned: !u.banned }) });
+                  const j = await res.json();
+                  if (res.ok && j.ok) { toast.show("تم التعديل","success"); load(); }
+                  else toast.show(j.error || "خطأ","error");
+                }}>{u.banned ? "رفع الحظر" : "حظر"}</Button>
+
+                <Button className="bg-rose-600" onClick={async ()=> {
+                  if(!confirm("حذف المستخدم نهائي؟")) return;
+                  const res = await fetch(`/api/admin/users/${u.id}`, { method: "DELETE" });
+                  const j = await res.json();
+                  if (res.ok && j.ok) { toast.show("تم الحذف","success"); load(); }
+                  else toast.show(j.error || "خطأ","error");
+                }}>حذف</Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
