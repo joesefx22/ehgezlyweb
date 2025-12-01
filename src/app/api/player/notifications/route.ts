@@ -1,3 +1,30 @@
+// src/app/api/player/notifications/route.ts
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSessionFromReq } from "@/lib/authServer";
+
+export async function GET(req) {
+  const session = await getSessionFromReq(req);
+  if (!session) return NextResponse.json({ ok:false }, { status:401 });
+  const notes = await prisma.notification.findMany({ where: { userId: session.userId }, orderBy: { createdAt: "desc" } });
+  return NextResponse.json({ ok:true, data: notes });
+}
+
+export async function POST(req) {
+  const session = await getSessionFromReq(req);
+  if (!session) return NextResponse.json({ ok:false }, { status:401 });
+  const body = await req.json();
+  if (body.action === "mark-all") {
+    await prisma.notification.updateMany({ where: { userId: session.userId, read: false }, data: { read: true }});
+    return NextResponse.json({ ok:true });
+  }
+  if (body.action === "mark-one" && body.id) {
+    await prisma.notification.update({ where: { id: body.id }, data: { read: true }});
+    return NextResponse.json({ ok:true });
+  }
+  return NextResponse.json({ ok:false, error:"invalid action" }, { status:400 });
+}
+
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
