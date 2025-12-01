@@ -400,3 +400,25 @@ enum CodeType {
   COMPENSATION
   PAYMENT
 }
+
+model Code {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  type        String
+  percent     Int?
+  amount      Int?
+  maxUsage    Int?
+  used        Int      @default(0)
+  allowedUser String?
+  createdAt   DateTime @default(now())
+  usages      CodeUsage[]
+}
+
+model CodeUsage {
+  id        String   @id @default(uuid())
+  codeId    String
+  code      Code     @relation(fields: [codeId], references: [id])
+  userId    String
+  bookingId String?
+  date      DateTime @default(now())
+}
