@@ -326,3 +326,30 @@ model Slot {
   stadiumId Int
   stadium   Stadium @relation(fields: [stadiumId], references: [id])
 }
+
+model Booking {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  stadiumId Int
+  slotId    Int
+  date      String
+  status    String   @default("pending") // pending, approved, rejected
+  paid      Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id])
+  stadium   Stadium  @relation(fields: [stadiumId], references: [id])
+  slot      Slot     @relation(fields: [slotId], references: [id])
+}
+model Booking {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  stadiumId     Int
+  slotId        Int
+  status        String    @default("pending")
+  paymentStatus String    @default("unpaid")
+  createdAt     DateTime  @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  stadium   Stadium  @relation(fields: [stadiumId], references: [id])
+  slot      Slot     @relation(fields: [slotId], references: [id])
+}
