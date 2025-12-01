@@ -1,3 +1,17 @@
+// src/app/api/play/[id]/route.ts
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function GET(req, { params }) {
+  const id = params.id;
+  const play = await prisma.playRequest.findUnique({
+    where: { id },
+    include: { participants: { include: { user: true } }, creator: true }
+  });
+  if (!play) return NextResponse.json({ ok:false, error: "not found" }, { status: 404 });
+  return NextResponse.json({ ok:true, data: play });
+}
+
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
