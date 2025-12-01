@@ -368,3 +368,35 @@ model Booking {
   stadium   Stadium  @relation(fields: [stadiumId], references: [id])
   slot      Slot     @relation(fields: [slotId], references: [id])
 }
+
+model Code {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  type          CodeType
+  amount        Float?   // لو نسبة أو مبلغ ثابت
+  percent       Float?   // لو خصم نسبة مئوية
+  maxUsage      Int      @default(1)
+  usedCount     Int      @default(0)
+  expiresAt     DateTime?
+  ownerId       String?        // الشخص المتعوض له (اختياري)
+  createdById   String
+  createdBy     User      @relation("CodeCreator", fields: [createdById], references: [id])
+  usages        CodeUsage[]
+  createdAt     DateTime @default(now())
+  isActive      Boolean  @default(true)
+}
+
+model CodeUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  bookingId String?
+  codeId    String
+  code      Code     @relation(fields: [codeId], references: [id])
+  usedAt    DateTime @default(now())
+}
+
+enum CodeType {
+  DISCOUNT
+  COMPENSATION
+  PAYMENT
+}
