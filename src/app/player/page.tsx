@@ -232,3 +232,56 @@ export default function PlayerDashboardPage() {
     </ModalWrapper>
   )}
 }
+
+"use client";
+import React, { useEffect, useState } from "react";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import PlayCard from "@/components/player/PlayCard";
+import { useToast } from "@/components/ui/use-toast";
+
+export default function PlayerHome() {
+  const [nearby, setNearby] = useState<any[]>([]);
+  const toast = useToast();
+
+  async function load() {
+    try {
+      const res = await fetch("/api/play?limit=6");
+      const j = await res.json();
+      if (res.ok) setNearby(j.data || []);
+      else toast.show(j.error || "خطأ في التحميل", "error");
+    } catch (e) {
+      console.error(e);
+      toast.show("خطأ في الشبكة", "error");
+    }
+  }
+
+  useEffect(()=>{ load(); }, []);
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">أهلاً — مرحبًا بك</h1>
+        <div className="flex gap-2">
+          <a href="/player/search"><Button>ابحث عن ماتش / ملعب</Button></a>
+          <a href="/player/bookings"><Button variant="secondary">حجوزاتي</Button></a>
+        </div>
+      </div>
+
+      <section className="mb-6">
+        <h2 className="text-lg font-medium mb-3">طلبات لعب قريبة</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {nearby.map(p => <PlayCard key={p.id} play={p} />)}
+          {nearby.length === 0 && <Card className="p-4">لا توجد طلبات حالياً</Card>}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-medium mb-3">ما الجديد</h2>
+        <Card className="p-4">
+          <div>تلميح: استخدم صفحة البحث لتحديد الملاعب حسب المنطقة والمستوى</div>
+        </Card>
+      </section>
+    </div>
+  );
+}
