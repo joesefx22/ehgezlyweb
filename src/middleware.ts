@@ -1,3 +1,66 @@
+// src/middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import prisma from "@/lib/prisma";
+
+const COOKIE_NAME = process.env.COOKIE_NAME || "ehg_token";
+
+async function getSession(req: NextRequest) {
+  const cookie = req.cookies.get(COOKIE_NAME)?.value || "";
+  if (!cookie) return null;
+  try {
+    const session = await prisma.session.findUnique({ where: { token: cookie } });
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+export async function middleware(req: NextRequest) {
+  const url = req.nextUrl.clone();
+  const { pathname } = url;
+
+  // dont protect static files, api webhook etc.
+  if (pathname.startsWith("/_next") || pathname.startsWith("/api/payments/webhook") || pathname.startsWith("/api/public")) {
+    return NextResponse.next();
+  }
+
+  // owner routes
+  if (pathname.startsWith("/owner")) {
+    const session = await getSession(req);
+    if (!session) {
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    // additionally check role = OWNER or ADMIN
+    const user = await prisma.user.findUnique({ where: { id: session.userId }});
+    if (!user || (user.role !== "OWNER" && user.role !== "ADMIN")) {
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // admin routes
+  if (pathname.startsWith("/admin")) {
+    const session = await getSession(req);
+    if (!session) {
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    const user = await prisma.user.findUnique({ where: { id: session.userId }});
+    if (!user || user.role !== "ADMIN") {
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/owner/:path*", "/admin/:path*"],
+};
+
 // src/middleware/rateLimit.ts
 const MAP = new Map<string, { tokens: number, last: number }>();
 export function allowRate(key: string, limit = 10, perSeconds = 60) {
@@ -70,3 +133,4 @@ export function allowRate(key: string, limit = 10, perSeconds = 60) {
   MAP.set(key, rec);
   return false;
 }
+
