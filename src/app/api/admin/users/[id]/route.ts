@@ -35,3 +35,27 @@ export async function PUT(req: Request, { params }: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSessionFromReq } from "@/lib/authServer";
+
+export async function PUT(req: Request, { params }: { params: { id:string } }) {
+  const session = await getSessionFromReq(req);
+  if (!session || session.role !== "ADMIN") return NextResponse.json({ ok:false, error:"forbidden" }, { status: 403 });
+
+  const body = await req.json();
+  const allowed:any = {};
+  if ("role" in body) allowed.role = body.role;
+  if ("banned" in body) allowed.banned = body.banned;
+
+  const updated = await prisma.user.update({ where: { id: Number(params.id) }, data: allowed });
+  return NextResponse.json({ ok:true, data: updated });
+}
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const session = await getSessionFromReq(req);
+  if (!session || session.role !== "ADMIN") return NextResponse.json({ ok:false, error:"forbidden" }, { status: 403 });
+
+  await prisma.user.delete({ where: { id: Number(params.id) }});
+  return NextResponse.json({ ok:true });
+}
