@@ -102,3 +102,108 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "SERVER_ERROR" }, { status: 500 });
   }
 }
+import { NextResponse } from "next/server";
+import crypto from "crypto";
+import prisma from "@/lib/prisma";
+import { logError } from "@/lib/logger";
+
+export async function POST(req: Request) {
+  try {
+    const raw = await req.text();
+    const body = JSON.parse(raw);
+
+    // verify HMAC if present:
+    const receivedHmac = body.hmac;
+    if (process.env.PAYMOB_HMAC_SECRET) {
+      const secret = process.env.PAYMOB_HMAC_SECRET;
+      // build canonical string as Paymob expects (already discussed earlier)
+      const canon = [
+        body.obj.amount_cents,
+        body.obj.created_at,
+        body.obj.currency,
+        body.obj.error_occured,
+        body.obj.has_parent_transaction,
+        body.obj.id,
+        body.obj.integration_id,
+        body.obj.is_3d_secure,
+        body.obj.is_auth,
+        body.obj.is_capture,
+        body.obj.is_refunded,
+        body.obj.is_standalone_payment,
+        body.obj.is_voided,
+        body.obj.order?.id ?? "",
+        body.obj.owner ?? "",
+        body.obj.pending ?? "",
+        body.obj.source_data?.pan ?? "",
+        body.obj.source_data?.sub_type ?? "",
+        body.obj.source_data?.type ?? "",
+        body.obj.success ?? ""
+      ].join("");
+      const h = crypto.createHmac("sha512", secret).update(canon).digest("hex");
+      if (h !== receivedHmac) return NextResponse.json({ error: "invalid_hmac" }, { status: 400 });
+    }
+
+    const success = !!body.obj.success;
+    const paymobOrderId = body.obj.order?.id;
+    const providerTxId = body.obj.id;
+
+    if (!paymobOrderId) return NextResponse.json({ error: "no_order" }, { status: 400 });
+
+    // Idempotency: ensure PaymentTransaction doesn't exist
+    const existingTx = await prisma.paymentTransaction.findUnique({ where: { providerTxId } });
+    if (existingTx) {
+      return NextResponse.json({ status: "already_processed" });
+    }
+
+    // find our order by paymobOrderId (we saved it earlier)
+    const order = await prisma.order.findFirst({ where: { paymobOrderId: String(paymobOrderId) }});
+    if (!order) {
+      // create paymentTransaction record anyway for tracing
+      await prisma.paymentTransaction.create({
+        data: { orderId: -1, provider: "paymob", providerTxId, status: success ? "SUCCESS" : "FAILED", payload: body }
+      });
+      return NextResponse.json({ status: "order_missing" }, { status: 404 });
+    }
+
+    // create transaction record and update order in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.paymentTransaction.create({
+        data: {
+          orderId: order.id,
+          provider: "paymob",
+          providerTxId,
+          status: success ? "SUCCESS" : "FAILED",
+          payload: body
+        }
+      });
+
+      if (success) {
+        await tx.order.update({
+          where: { id: order.id },
+          data: { status: "PAID", paymentTxId: providerTxId }
+        });
+
+        // If order has codeAppliedId => insert usage (upsert unique constraint prevents double)
+        if (order.codeAppliedId) {
+          await tx.codeUsage.upsert({
+            where: { codeId_orderId: { codeId: order.codeAppliedId, orderId: order.id } },
+            create: { codeId: order.codeAppliedId, orderId: order.id, userId: order.userId ?? null },
+            update: {}
+          });
+          // increment usedCount atomically
+          await tx.code.update({
+            where: { id: order.codeAppliedId },
+            data: { usedCount: { increment: 1 } }
+          });
+        }
+      } else {
+        await tx.order.update({ where: { id: order.id }, data: { status: "FAILED" }});
+      }
+    });
+
+    return NextResponse.json({ status: "ok" });
+  } catch (err) {
+    logError("webhook", err);
+    return NextResponse.json({ error: "server_error" }, { status: 500 });
+  }
+}
