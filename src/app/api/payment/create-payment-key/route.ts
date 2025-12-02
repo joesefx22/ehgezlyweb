@@ -1,3 +1,7 @@
+// after const paymobOrderId = orderRes.data.id;
+await prisma.order.update({ where: { id: order.id }, data: { paymobOrderId: String(paymobOrderId) }});
+
+
 // src/app/api/payment/create-payment-key/route.ts
 import { NextResponse } from "next/server";
 import axios from "axios";
