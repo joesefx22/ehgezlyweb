@@ -1,3 +1,9 @@
+await sendMail(order.user.email, "🎉 تم تأكيد الدفع", `
+  <h2>تم الدفع بنجاح</h2>
+  <p>رقم الطلب: ${order.id}</p>
+`);
+
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
