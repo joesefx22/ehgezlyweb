@@ -1,31 +1,44 @@
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { code, userId, bookingId } = await req.json();
+    const { code, userId, originalPrice } = await req.json();
 
-    const c = await prisma.code.findUnique({ where: { code } });
-
-    if (!c) return NextResponse.json({ ok: false });
-
-    // update count
-    await prisma.code.update({
-      where: { code },
-      data: { used: c.used + 1 },
+    const discount = await prisma.discountCode.findFirst({
+      where: { code, isActive: true }
     });
 
-    // add usage log
-    await prisma.codeUsage.create({
-      data: {
-        codeId: c.id,
-        userId,
-        bookingId,
-      },
+    if (!discount)
+      return NextResponse.json({ error: "INVALID_CODE" }, { status: 400 });
+
+    // Prevent using more than limit
+    if (discount.usedCount >= discount.usageLimit)
+      return NextResponse.json({ error: "EXCEEDED_LIMIT" }, { status: 400 });
+
+    // Prevent same user using the same code twice
+    const alreadyUsed = await prisma.codeUsage.findFirst({
+      where: { codeId: discount.id, userId }
     });
 
-    return NextResponse.json({ ok: true });
+    if (alreadyUsed)
+      return NextResponse.json({ error: "ALREADY_USED" }, { status: 400 });
+
+    let finalPrice = originalPrice;
+
+    if (discount.type === "PERCENT") {
+      finalPrice = Math.round(originalPrice - (originalPrice * discount.value) / 100);
+    } else {
+      finalPrice = Math.max(originalPrice - discount.value, 0);
+    }
+
+    return NextResponse.json({
+      status: "VALID",
+      discountId: discount.id,
+      finalPrice
+    });
   } catch (err) {
-    return NextResponse.json({ error: "Error using code" }, { status: 500 });
+    console.log(err);
+    return NextResponse.json({ error: "SERVER_ERROR" }, { status: 500 });
   }
 }
