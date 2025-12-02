@@ -127,3 +127,33 @@ html, body, #__next {
   border-radius: 10px;
   color: inherit;
 }
+
+/* تحسين الـ smoothness */
+* {
+  scroll-behavior: smooth;
+}
+
+/* شكل زر جديد */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-lg;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-lg;
+}
+
+.card {
+  @apply p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+}
+
+.table-header {
+  @apply bg-gray-100 font-semibold text-sm;
+}
+
+.table-row {
+  @apply border-b hover:bg-gray-50 transition;
+}
