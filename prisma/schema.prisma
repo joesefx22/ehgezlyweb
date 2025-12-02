@@ -422,3 +422,16 @@ model CodeUsage {
   bookingId String?
   date      DateTime @default(now())
 }
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  userId        String?
+  playgroundId  String?
+  date          DateTime?
+  time          String?
+  originalPrice Int
+  finalPrice    Int
+  codeAppliedId String?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
