@@ -435,3 +435,55 @@ model Order {
   status        String   @default("PENDING")
   createdAt     DateTime @default(now())
 }
+
+model Order {
+  id                Int      @id @default(autoincrement())
+  userId            String?
+  playgroundId      String?
+  date              DateTime?
+  time              String?
+  originalPrice     Int
+  finalPrice        Int
+  codeAppliedId     String?      // FK -> Code.id
+  status            String       @default("PENDING") // PENDING | PAID | FAILED
+  paymobOrderId     String?      @unique
+  paymentTxId       String?      @unique
+  createdAt         DateTime     @default(now())
+}
+
+model Code {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        CodeType
+  percent     Int?
+  amount      Int?
+  maxUsage    Int?     @default(1)
+  usedCount   Int      @default(0)
+  ownerId     String?
+  createdById String?
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  usages      CodeUsage[]
+}
+
+model CodeUsage {
+  id        String   @id @default(cuid())
+  codeId    String
+  code      Code     @relation(fields: [codeId], references: [id])
+  userId    String?
+  orderId   Int?
+  createdAt DateTime @default(now())
+
+  @@unique([codeId, orderId], name: "uniq_code_order") // idempotency: one code per order
+}
+
+model PaymentTransaction {
+  id            String @id @default(cuid())
+  orderId       Int    @unique
+  provider      String
+  providerTxId  String @unique
+  status        String
+  payload       Json
+  createdAt     DateTime @default(now())
+}
