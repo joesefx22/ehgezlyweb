@@ -1,3 +1,8 @@
+{
+  name: "سجل الأكواد",
+  href: "/owner/codes-usage"
+}
+حط ده في مكانه 
 import React from 'react';
 import Link from 'next/link';
 import { User, UserRole } from '@/types';
