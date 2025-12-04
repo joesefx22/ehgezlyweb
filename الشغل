@@ -1,0 +1,1067 @@
+بص انا عندي مشروع react next.js tailwind css وعندي مصيبة في تنظيمه 
+نا هشرحلك مشكلتي بالتفصيل عندي مشروع احجزلي شغال عليه ب react وعندي باك اند ليه المشكلة ان عدد الملفات ضخم اوي ممكن 200 ملف وعندي حاجات غريبة مثلا عندي prisma , db.js عندي middleware.ts وفي الباك اند عندي middleware.js وعندي مصايب في حته التسمية ممكن يبقي شغل الموظف متسمي في حته ب employee وفي حته ب staff وممكن يبقي عندي stadiums وفي حته courtes وحاجات كتير زي دي كمان ظهرلي في اخر فترة فولدرات انا ارجح ان مكانها جوا src وهي طبعت برا خالص في الملفات اللي با وعندي مصيبة اني باخد الكود منك فانت بتعطيني متطفات ففي ملفات فيها تلت او اربع سطور لعمل وظيفة تحتاج عدد كبير من السطور وتجد ايضا ان في ملفات كتير كان بيبقي معايا كود قديم فيها مثلا 70 سطر وانت تعطيني 100 سطر فبدل ما اشيل القديم واحط الجديد انا بحط الاتنين مع بعض ويبقي معايا 170 سطر وهذا الامر بيحصل في الملفات الحساسة اللي محتاجة تعديلات كتير فتلاقي فيها 430 سطر والمفروض اصلا يبقي فيها مثلا 120 المشكلة معقدة اوي ساعدني
+
+انا جايلك انت عشان تساعدني المشكلة عندك في الشات ان في حدود في الطول فأنا قسمت الشغل لمجموعات كل مجموعه عشر ملفات نخلص كل مجموعه وفي أول كل شات هعطيك المشكلة واحنا وصلنا في اي مجموعه وblueprint مفصل للمشروع والهيكل القديم والمجموعه اللي هنشتغل عليها بالتفصبل 
+وانت عليك تفهم المجموعه ونظام الweb app من ال blueprint والهيكل القديم وتعمل التعديلات المطلوبة علي الملفات اللي هعطيهالك في المجموعه 
+الكلام ده هيبقي في ملف وهبعتلك المجموعه المطلوبة في الشات 
+
+هنبني لك بلوبرنت عملي ومفصّل جداً بالوظائف + التصميم + سلوك كل زر وحالة، زي ما طلبت. كل حاجة هتتوافق مع وصفك، ومع العناصر اللي موجودة في الـ zip بتاعك، ومتناسبة عشان تقدر تبعت 10 ملفات في كل شات للأداة وتنفذ الموقع خطوة بخطوة.
+
+هقسم البلوبرنت لقسمين أساسيين:
+
+واجهة المستخدم + التصميم (Layout, Components, States) — وصف دقيق لكل صفحة وكل عنصر بصري.
+
+الوظائف التفصيلية (Flows, API calls, Validation, Permissions, Data model) — كيف تتصرف الواجهات، متى تتصل بالـ API، وشروط النجاح والفشل.
+
+نبدأ.
+
+1) نظرة عامة (High-level)
+
+الهدف: صفحة رئيسية بسيطة وواضحة — هيدر/نافبار، خانتين رئيسيتين (ملاعب كورة — ملاعب بادِل)، زر “إضافة ملعب” يُحوّل إلى Google Form، وفوتر.
+من الصفحة الرئيسية المستخدم يقدر يدخل لقائمة ملاعب الكورة أو البادل. كل ملعب يظهر ككارت (image, name, features, directions, multi-day selector ثم ساعات). عملية الحجز بسيطة ومباشرة: اختيار يوم → اختيار ساعة (المتوفر فقط) → طق “احجز الآن” → إدخال بيانات سريعة → دفع العربون (online أو using code) أو حجز فوري لو العربون صفر → عرض الحجز في صفحة “حجوزاتي”.
+
+2) الصفحة الرئيسية (Landing)
+
+Layout:
+
+Header (ثابت أعلى الصفحة)
+
+Logo (يسار)
+
+Search bar (وسط) — بحث عام عن ملاعب/ماتشات
+
+Nav links (يمين): تسجيل/دخول (لو مش متسجل) أو أيقونة الملف + اسم المستخدم (لو متسجل)
+
+Navbar (تحت الهيدر أو مدمج):
+
+Links: ملاعب كورة | ملاعب بادِل | لاعبوني معاكم | حجوزاتي | تواصل | عنّا
+
+Hero (Large banner)
+
+Left: عنوان مختصر + CTA “ابحث عن ملعب” + زر “أضف ملعب” (يوجّه إلى Google Form خارجي)
+
+Right: صورة/carousel لملاعب مختارة
+
+ثم Section: خانتين بجانب بعض (Responsive — تتحول عمودي على موبايل)
+
+خانة 1: ملاعب الكرة (عنوان، وصف قصير، زر “عرض كل ملاعب الكرة”)
+
+خانة 2: ملاعب البادل (نفس الشكل)
+
+Footer: روابط تواصل، سياسات، حقوق النشر
+
+وظائف مباشرة على Landing:
+
+زر “أضف ملعب” → يفتح Google Form (target=_blank)
+
+زر “عرض كل ملاعب الكرة” → يذهب إلى /stadiums مع فلتر type=football
+
+عند البحث يظهر نتائج سريعة داخل Navbar (autocomplete)
+
+3) صفحة قائمة الملاعب (Stadiums / Playgrounds list)
+
+Route:
+
+/stadiums?type=football و /stadiums?type=paddle (type default football)
+
+Layout:
+
+Filter sidebar (يسار على ديسكتوب): المدينة، السعر، الوقت، المميزات (أضواء، شاطئ، مدرب...)
+
+Main area: Grid of cards (3-cols desktop, 2 tablet, 1 mobile)
+
+Stadium Card (component)
+
+Contents:
+
+صورة الملعب (cover)
+
+اسم الملعب + badge لنوع الملعب (Football / Paddle)
+
+قائمة مختصرة للمميزات (أيقونات: lights, turf, showers, toilets)
+
+زر Directions (يفتح خارجيًا Google Maps مع الإحداثيات)
+
+Multi-day selector (سبع أيام — اليوم الحالي + 6 أيام قادمة)
+
+عرض الأيام كـ toggle chips (ممكن يختار أكثر من يوم)
+
+لكل يوم، عند اختياره تظهر تحتها ساعات متاحة لهذا اليوم
+
+ساعات اليوم: عرض ساعات كأزرار
+
+إذا الساعة محجوزة → لا تظهر (أو تظهر disabled/مخفية حسب اختيارك؛ طلبك: "لو ساعة محجوزة لا تعرض")
+
+لو الساعة متاحة → زر الساعة يظهر
+
+عند الضغط على ساعة:
+
+يفتح card footer أو modal صغير يظهر زر “احجز الآن”
+
+يعرض تفاصيل السعر (الكامل + عربون)، إن كان مطلوب عربون وكم نسبته أو قيمة ثابتة
+
+CTA: “احجز الآن” → يفتح modal حجز سريع
+
+UI behavior notes:
+
+اختيار يوم/ساعات لا يحمّل الصفحة (AJAX/Client-side fetch).
+
+Pagination / infinite scroll عند عدد كروت كبير.
+
+Sorting: مسافة، تقييم، سعر.
+
+4) حجز سريع (Booking Flow — user journey)
+
+Flow steps:
+
+المستخدم يضغط على ساعة متاحة في كارت الملعب.
+
+Modal حجز يظهر (أو صفحة stepper إذا تريد صفحة منفصلة). سأصف modal مع خطوة تمهيدية للـ Payment.
+
+عنوان: تأكيد الحجز
+
+تفاصيل الملعب: اسم، تاريخ (اليوم المختار)، الساعة، السعر الإجمالي
+
+عدد اللاعبين (اختياري للعرض) — default 0
+
+حقل ملاحظات (اختياري)
+
+زر “التالي: بيانات الحاجز”
+
+بيانات الحاجز (simple form):
+
+الاسم الكامل (required, text)
+
+رقم الهاتف (required, validated E.164 أو رقم محلي مع prefix)
+
+(اختياري) البريد الإلكتروني
+
+زر “تأكيد وادفع العربون” أو “احجز فورًا” (لو العربون = 0)
+
+عند الضغط:
+
+Frontend يرسل طلب إلى API لإنشاء pending booking (status: pending_payment أو confirmed إذا عربون=0)
+
+Payload مثال:
+
+{
+  "stadiumId": "st123",
+  "date": "2025-12-20",
+  "slot": "18:00-19:00",
+  "price": 200,
+  "deposit": 50,
+  "user": { "name": "Ali", "phone": "+2010XXXX", "email": "..." },
+  "playersCount": 6,
+  "notes": "..."
+}
+
+
+API يتحقق من أن الساعة لا تزال متاحة (atomic check) → إذا غير متاحة، يرجع خطأ وحالة UI تظهر رسالة “للأسف الحجز تم حجزه الآن من قبل شخص آخر”.
+
+إذا العربون > 0:
+
+Redirect إلى صفحة دفع /payment/{bookingId} أو تفتح modal دفع.
+
+في صفحة الدفع: تختار وسيلة الدفع:
+
+Online (Paymob) — يولد order & token, يفتح بوابة الدفع، بعد النجاح Paymob يقوم callback/webhook → API يضع booking status = confirmed، ويخصم العربون من إجمالي ثم يحفظ transaction.
+
+Code (كود خصم) — حقل لإدخال كود، يمكن تطبيق خصم أو جعل طريقة دفع خاصة (مثل Voucher). إذا الكود يغطي العربون أو يغطي الحجز ينفّذ الحجز.
+
+إذا العربون = 0:
+
+Booking يصبح confirmed فوراً دون دفع.
+
+بعد إتمام الدفع بنجاح:
+
+واجهة تؤكد الحجز، وتعرض زر “اذهب إلى حجوزاتي”.
+
+الساعة تصبح محجوزة (DB update).
+
+إشعار يُرسل: إلى الحاجز (player), owner, staff (حسب إعدادات) — باستخدام email & internal notifications.
+
+صفحة “حجوزاتي”:
+
+تعرض كل الحجوزات مع حالة (pending_payment / confirmed / cancelled)
+
+لكل حجز: زر "طلب اللاعبين" (إن لم يُستخدم) — ويعرض الحالة: باقي كام من العربون، كمية اللاعبين انضمت، متى ينتهي الحجز، إمكانية الإلغاء.
+
+Edge cases:
+
+Concurrent booking: API يجب أن يستخدم transaction/locking (مثال: check-and-create in single DB transaction) لتجنب double-book.
+
+Expiring pending bookings: إذا هناك وقت محدد للـ payment (مثلاً 10 دقائق) → job/cron ينظف الـ pending bookings ويعيد جعل الـ slot متاح.
+
+Refunds: عند إلغاء الحجز، الـ refund policy تطبيقه عند server & Paymob.
+
+5) الدفع (Payment Flow details)
+
+Pages/APIs:
+
+/payment/{bookingId} — صفحة الدفع
+
+API: POST /api/payments/create-order → يخلق order لدى Paymob & returns payment_url / token
+
+API: POST /api/payments/verify → للتحقق بعد الدفع (or webhook)
+
+Payment methods:
+
+Online via Paymob
+
+Create order (bookingId, amountToPay)
+
+Redirect to Paymob iframe/page
+
+Paymob callback → backend webhook → mark booking confirmed & store transaction details
+
+Code / Voucher
+
+User enters voucher code in payment page
+
+API validates code (validity, usage, expiration)
+
+If code covers required deposit, mark as paid and confirm booking
+
+If code is partial, subtract amount and proceed to Paymob for the remaining
+
+Deposit = 0
+
+Skip payment; set booking confirmed immediately
+
+UI details:
+
+Show breakdown: total price, deposit, remaining balance
+
+If partial deposit paid, show button “دفع الباقي” في حجوزاتي
+
+Security:
+
+All payment callbacks must be validated (signatures)
+
+Prevent tampering by verifying amounts server-side (not trusting frontend)
+
+6) طلب لاعبين (Player Requests / "لاعبوني معاكم")
+
+Flow:
+
+على صفحة حجز أو من صفحة ملعب أو صفحة لعب جماعي، يوجد زر “اطلب لاعبين”
+
+Modal/form يطلب:
+
+عدد اللاعبين المطلوبين (1..n) — multi-select or number input
+
+الفئة العمرية (dropdown) — e.g., 12-16, 17-25, 26+
+
+المستوى (dropdown) — beginner/intermediate/advanced
+
+ملاحظات إضافية
+
+زر “تأكيد الطلب”
+
+عند التأكيد:
+
+Request يُخزن في DB تحت resource "play_requests" مُرتبط بـ stadiumId وbookingId (إن وُجد) مع status = open
+
+Request يظهر في صفحة "لاعبوني معاكم" كـ card (owner/staff يمكنهم رؤية الطلبات)
+
+في صفحة "لاعبوني معاكم" (public / players feed):
+
+كل طلب في كارت: يبين تفاصيل الطلب + زر “انضم للعب”
+
+لاعب يضغط “انضم للعب” → يكتب عدد اللاعبين معه (1..3) + اختياري رقم تواصل
+
+عند تأكيد الانضمام:
+
+النظام يُضيف الانضمام إلى الطلب، ويُرسل إشعار للحاجز (owner/staff).
+
+الحاجز يقبل/يرفض الطلب (في لوحة الموظف/المالك): Accept or Reject
+
+قبول الحاجز:
+
+لو الطلب تم تأكيده بالكامل (عدد الانضمامات >= المطلوب) → Request status = closed, تُعلم كل المنضمين، وإن كان مرتبط بحجز → يتم حذف الطلب أو وسمه كمكتمل
+
+لو أقل من المطلوب → يقل العدد المطلوب بقيمة المنضمين (remaining needed updated)
+
+رفض الحاجز:
+
+حقول ملاحظة للرفض، المنضمين يتلقون إشعار بالرفض.
+
+7) نظام التسجيل والتحويل للصفحات بحسب الدور (Auth & Role-based routing)
+
+Roles:
+
+player (لاعب)
+
+staff (موظف)
+
+owner (صاحب الملعب)
+
+admin (مدير النظام)
+
+Registration & Login:
+
+عند التسجيل: user record يحتوي على roles: [] و stadiums: [] (array of stadium IDs — مهم جداً كما طلبت)
+
+بعد تسجيل الدخول، الواجهة تقوم بفحص الـ roles وتوجه المستخدم:
+
+player → /player (player dashboard)
+
+staff → /staff (staff dashboard)
+
+owner → /owner (owner dashboard)
+
+admin → /admin (admin dashboard)
+
+إذا للمستخدم أدوار متعددة، اعرض اختيار role بعد تسجيل الدخول أو استخدم الدور الأساسي (primaryRole).
+
+Role checks:
+
+كل route حساس محمي بـ server-side check (API): verify JWT/session + role included
+
+Middleware (Next.js middleware.ts) يعيد توجيه المستخدم حسب الدور أو يمنع الوصول
+
+8) صفحات فرعية للموظف حسب عدد الملاعب (Multi-stadium staff pages)
+
+Requirement: إذا الموظف مرتبط بملعب/أكثر عبر حقل stadiums: [id1, id2, ...] في user document، يجب إنشاء صفحة فرعية لكل ملعب تلقائياً.
+
+Implementation approach:
+
+Staff main page: /staff
+
+يعرض قائمة الملاعب (cards) التي الموظف مرتبط بها (query: user.stadiums)
+
+لكل ملعب في القائمة: link إلى /staff/stadiums/{stadiumId} أو /staff/{stadiumId}
+
+صفحات فرعية تولد ديناميكياً (dynamic routes):
+
+Route: /staff/stadiums/[stadiumId]/dashboard
+
+Route: /staff/stadiums/[stadiumId]/bookings
+
+Route: /staff/stadiums/[stadiumId]/players-requests
+
+كل صفحة تستدعي بيانات الملعب عبر stadiumId وقياسات صلاحيات الموظف محدودّة لهذا الملعب فقط.
+
+إن إضافة/حذف ID من user.stadiums يغير الصفحات المعروضة تلقائياً.
+
+9) صلاحيات كل دور — تفصيل دقيق
+Player
+
+تصوير: ملف تعريف، حجز، طلب لاعبين، الانضمام لطلبات، استلام إشعارات
+
+صلاحيات API: create booking (limited to own user), cancel booking (own bookings), create play_request, join play_request, view own payments.
+
+Staff
+
+صفحة لكل ملعب في user.stadiums
+
+صلاحيات:
+
+عرض كل الحجوزات لملعبه
+
+إنشاء حجز نيابة عن أي لاعب (book on behalf)
+
+إلغاء أي حجز لملعبه
+
+قبول/رفض play_requests لملعبه
+
+إدارة حضور الموظفين (attendance toggles)
+
+تلقي إشعارات فورياً بالحجوزات الجديدة
+
+ملاحظة أمان: staff لا يملك صلاحية إضافة ملاعب جديدة.
+
+Owner
+
+صلاحيات:
+
+عرض إحصائيات مفصّلة لكل ملعب في user.stadiums (إذا صاحبه لعدة ملاعب)
+
+دعوة وإدارة staff: assign staff to stadiums (update staff.user.stadiums)
+
+تعديل تفاصيل الملعب (name, price, features, location)
+
+لا يمكن حذف المستخدمين (unless admin)
+
+لا يضيف ملعب (حسب طلبك) — لكن إن أردنا هذه الخاصية يمكن إضافتها لاحقًا (ضعها تحت صلاحيات admin)
+
+Admin
+
+صلاحيات كاملة:
+
+إضافة / تعديل / حذف ملاعب
+
+تحديد نوع الملعب (football / paddle)
+
+إحصائيات شاملة للموقع: إجمالي الحجوزات، إجمالي العربونات، إجمالي العائدات، ساعات محجوزة، تقارير بفترة زمنية (اليوم، الشهر، 3 أشهر...)
+
+إدارة الكوبونات / الأكواد (create, expire, usage limits)
+
+إدارة المستخدمين (role assignment)
+
+مراقبة webhooks / payments logs
+
+Admin UI:
+
+Dashboard مع date picker (من/إلى) وفلتر حسب الملعب أو الكل
+
+Reports export (CSV/PDF)
+
+10) Data model (أساسيات مهمة، مبسطة)
+
+User
+
+{
+  "id": "u123",
+  "name": "Ali",
+  "phone": "+2010...",
+  "email": "ali@ex.com",
+  "roles": ["player","staff"],
+  "stadiums": ["s1","s2"],   // array of stadium IDs => مولد الصفحات الفرعية
+  "primaryRole": "player",
+  ...
+}
+
+
+Stadium
+
+{
+  "id": "s1",
+  "name": "ملعب الهرم",
+  "type": "football", // football | paddle
+  "location": { "lat": .., "lng": .., "address": "..." },
+  "features": ["lights","turf","showers"],
+  "pricePerHour": 200,
+  "deposit": 50, // could be percentage or fixed
+  "slots": {
+    "2025-12-04": ["08:00","09:00",...],
+    ...
+  },
+  "ownerId": "owner123",
+  "staffIds": ["u45","u46"],
+  ...
+}
+
+
+Booking
+
+{
+  "id":"b1",
+  "stadiumId":"s1",
+  "date":"2025-12-04",
+  "slot":"18:00-19:00",
+  "status":"pending_payment | confirmed | cancelled",
+  "price":200,
+  "depositPaid":50,
+  "userId":"u123",
+  "playersRequested": 6,
+  "playersJoined": [{"userId":"u234","count":2}, ...],
+  "notes":""
+}
+
+
+PlayRequest
+
+{
+  "id":"r1",
+  "stadiumId":"s1",
+  "bookingId": "optional",
+  "requiredPlayers": 6,
+  "ageGroup": "17-25",
+  "level": "intermediate",
+  "status":"open | partial | closed",
+  "joiners":[ {"userId":"u2","count":2}, ... ],
+  ...
+}
+
+
+Code / Voucher
+
+{
+  "code":"DISC2025",
+  "type":"discount|full",
+  "amount":100,
+  "usesLeft":5,
+  "expiry":"2026-01-01"
+}
+
+11) API Endpoints (Suggested mapping — align مع مشروعك الموجود)
+
+(ستكون جزءاً من src/app/api/... أو src/pages/api/... حسب App Router)
+
+Core APIs:
+
+POST /api/bookings/create — create booking (returns bookingId and requiredDeposit)
+
+GET /api/stadiums?type=football — list stadiums with slots availability
+
+GET /api/stadiums/{id} — details + upcoming slots
+
+POST /api/payments/create-order — create paymob order
+
+POST /api/payments/verify — verify after payment
+
+POST /api/play-requests — create a player request
+
+POST /api/play-requests/{id}/join — join a request
+
+POST /api/bookings/{id}/cancel — cancel booking
+
+GET /api/users/{id}/bookings — user bookings
+
+GET /api/admin/reports?from=...&to=... — admin reports
+
+Permissions enforced server-side.
+
+12) UI Components List (To implement & reuse — each component props described)
+
+Header (props: user)
+
+Navbar (props: activeTab)
+
+StadiumCard (props: stadium, onSelectSlot)
+
+DayChips (props: days[], selected[])
+
+SlotButton (props: time, available)
+
+BookingModal (props: stadium, date, slot, price)
+
+SmallForm (name, phone)
+
+PaymentPage (props: bookingId)
+
+PlayerRequestCard (props: request, onJoin)
+
+MyBookingsList (props: userId)
+
+OwnerStatsCard (props: stadiumId, metrics)
+
+AdminDashboard (props: globalStats)
+
+13) UI States & Validation (detailed)
+
+Phone validation: required, numeric, length 10 (Egypt) or accept +20 format — show inline error
+
+Name: min 2 chars
+
+Concurrent booking: if server returns 409 conflict → show toast "تم حجز هذه الساعة الآن"
+
+Payment failure: show detailed error + retry
+
+Voucher invalid/expired: inline error
+
+Empty slot list for day: show “لا توجد مواعيد متاحة لهذا اليوم”
+
+On success booking: show confirmation modal with bookingId, share link, and “اذهب إلى حجوزاتي”
+
+14) Notifications & Emails
+
+On booking creation (pending): email to player confirming request with bookingId
+
+On booking confirmed: email to player + owner + staff
+
+On booking cancelled: email to player + owner + staff
+
+On play_request created: push internal notification to owner/staff + email optional
+
+Notification types: in-app toast, email, push (optional later)
+
+15) Admin Reports (detailed metrics)
+
+For each stadium and global:
+
+Total bookings in period
+
+Booked hours in period
+
+Revenue (total deposits + paid)
+
+Cancelled bookings count
+
+Average occupancy rate per day/week/month
+
+Top hours (most booked hours)
+
+CSV export per stadium or all
+
+16) Extra details & Edge-cases I أضفتها لك
+
+Pending booking expiry (configurable, e.g., 10 minutes)
+
+Prevent double-spend vouchers (atomic decrement)
+
+Soft-cancel vs hard-cancel (soft = refund policy)
+
+Role switching UI if user has multiple roles
+
+Staff: ability to create bookings for walk-in players (manual entry)
+
+17) ماذا تبعث للأداة (خطة 10 ملفات لكل شات)
+
+لكي تنشئ الموقع خطوة بخطوة مع الأداة التي تقبل 10 ملفات لكل مرة — سأقترح دفعات ملفية منظمة بحيث كل دفعة تبني جزءًا مكتملًا من الواجهة والـ API:
+
+Batch 1 (Home + Core libs) — 10 ملفات:
+
+src/app/layout.tsx (Header/Nav/Footer layout)
+
+src/app/page.tsx (Landing)
+
+src/components/StadiumCard.tsx
+
+src/components/DayChips.tsx
+
+src/components/SlotButton.tsx
+
+src/lib/api.ts (http wrapper)
+
+src/lib/prisma.ts (DB client) — إذا تبغى نسخة للـ mock لاحقاً
+
+src/app/api/stadiums/route.ts (list stadiums endpoint)
+
+src/app/stadiums/page.tsx (stadiums listing page)
+
+tailwind.config.js (styling base)
+
+Batch 2 (Booking UI + API):
+
+src/components/BookingModal.tsx
+
+src/app/stadiums/[id]/page.tsx (stadium detail)
+
+src/app/api/bookings/create/route.ts
+
+src/app/api/bookings/[id]/route.ts (get booking)
+
+src/app/bookings/[slotId]/page.tsx (if needed)
+
+src/components/SmallForm.tsx
+
+src/components/PaymentSummary.tsx
+
+src/app/payment/[bookingId]/page.tsx
+
+src/app/api/payments/create-order/route.ts
+
+src/app/api/payments/verify/route.ts
+
+Batch 3 (Auth/Users & MyBookings):
+... and so on — أقدر أرتب بقية الباتشات بالتفصيل لما توافق على Batch1.
+
+
+
+الهيكل القديم اللي هنعدل عليه :project/
+    ehgezlyweb-main/
+        .env
+        next.config.js
+        package.json
+        tailwind.config.js
+        tsconfig.json
+        api/
+            codes/
+                create/
+                    route.ts
+                use/
+                    route.ts
+                validate/
+                    route.ts
+        backend/
+            config.js
+            controllers.js
+            db.js
+            emailservice.js
+            middleware.js
+            models.js
+            routes.js
+            server.js
+            uploadconfig.js
+        prisma/
+            schema.prisma
+        public/
+            manifest.json
+            sw.js
+        src/
+            middleware.ts
+            app/
+                globals.css
+                layout.tsx
+                page.tsx
+                sitemap.ts
+                (admin)/
+                    codes/
+                        page.tsx
+                        _components/
+                            CreateCodeModal.tsx
+                            UsageModal.tsx
+                (auth)/
+                    layout.tsx
+                    login/
+                        page.tsx
+                    signup/
+                        page.tsx
+                (dashboard)/
+                    layout.tsx
+                    page.tsx
+                    bookings/
+                        page.tsx
+                        confirm/
+                            page.tsx
+                    owner/
+                        codes-usage/
+                            page.tsx
+                    requests/
+                        page.tsx
+                    stadiums/
+                        [id]/
+                            page.tsx
+                (player)/
+                    checkout/
+                        page.tsx
+                        final/
+                            page.tsx
+                about/
+                    page.tsx
+                admin/
+                    page.tsx
+                    code-reports/
+                        page.tsx
+                    codes/
+                        page.tsx
+                    dashboard/
+                        page.tsx
+                    reports/
+                        page.tsx
+                    src/
+                        app/
+                            admin/
+                                stadiums/
+                                    page.tsx
+                    users/
+                        page.tsx
+                api/
+                    admin/
+                        code-usages/
+                            route.ts
+                        codes/
+                            route.ts
+                            [codeId]/
+                                route.ts
+                        stats/
+                            route.ts
+                        users/
+                            route.ts
+                            [id]/
+                                route.ts
+                    auth/
+                        route.ts
+                        me/
+                            route.ts
+                    blocked-slots/
+                        route.ts
+                    bookings/
+                        route.ts
+                        [bookingId]/
+                            status/
+                                route.js
+                        [id]/
+                            route.ts
+                        cancel/
+                            route.ts
+                        create/
+                            route.ts
+                    codes/
+                        create/
+                            route.ts
+                        delete/
+                            route.ts
+                        list/
+                            route.ts
+                        usage/
+                            route.ts ts
+                        use/
+                            route.ts
+                        validate/
+                            route.ts
+                    employee/
+                        stadiums/
+                            route.ts
+                            [id]/
+                                route.ts
+                    health/
+                        route.ts
+                    matches/
+                        route.ts
+                        [id]/
+                            route.ts
+                        join/
+                            route.ts
+                    owner/
+                        analytics/
+                            route.ts
+                        bookings/
+                            route.js
+                            route.ts
+                            [id]/
+                                cancel/
+                                    route.ts
+                                confirm/
+                                    route.ts
+                        fields/
+                            route.ts
+                            [id]/
+                                route.ts
+                        profile/
+                            route.ts
+                    payment/
+                        callback/
+                            route.ts
+                        create-order/
+                            route.ts
+                        create-payment-key/
+                            route.ts
+                        verify/
+                            route.ts
+                        webhook/
+                            route.ts
+                    payments/
+                        create/
+                            route.js
+                            route.ts
+                        webhook/
+                            route.js
+                            route.ts
+                    play/
+                        route.ts
+                        [id]/
+                            page.tsx
+                            route.ts
+                            join/
+                                route.ts
+                    player-requests/
+                        route.ts
+                    player/
+                        bookings/
+                            route.ts
+                            [id]/
+                                cancel/
+                                    route.ts
+                        create-request/
+                            route.ts
+                        history/
+                            route.ts
+                        notifications/
+                            route.ts
+                        profile/
+                            route.ts
+                        request/
+                            cancel/
+                                route.ts
+                        requests/
+                            route.ts
+                    plays/
+                        [id]/
+                            route.ts
+                    ratings/
+                        route.ts
+                    stadium/
+                        route.js
+                        [id]/
+                            route.js
+                            bookings/
+                                route.js
+                                [bookingId]/
+                                    route.js
+                            slots/
+                                route.js
+                                [slotId]/
+                                    route.js
+                            staff/
+                                route.ts
+                                [staffId]/
+                                    route.ts
+                                    attendance/
+                                        route.ts
+                        create/
+                            route.js
+                    stadiums/
+                        [id]/
+                            generate-slots/
+                                route.ts
+                    staff/
+                        attendance/
+                            route.ts
+                        bookings/
+                            route.ts
+                            [id]/
+                                route.ts
+                        playgrounds/
+                            route.ts
+                            [id]/
+                                route.ts
+                        reports/
+                            daily/
+                                route.ts
+                        today/
+                            route.ts
+                    user/
+                        change-password/
+                            route.ts
+                        profile/
+                            route.ts
+                booking/
+                    [slotId]/
+                        page.tsx
+                contact/
+                    page.tsx
+                employee/
+                    page.tsx
+                    stadiums/
+                        [id]/
+                            page.tsx
+                landing/
+                    page.tsx
+                owner/
+                    page.tsx
+                    analytics/
+                        page.tsx
+                    bookings/
+                        page.jsx
+                        page.tsx
+                    profile/
+                        page.tsx
+                    stadium/
+                        [id]/
+                            page.jsx
+                            bookings/
+                                page.jsx
+                            slots/
+                                page.jsx
+                            staff/
+                                page.jsx
+                    stadiums/
+                        page.tsx
+                        [id]/
+                            edit/
+                                page.tsx
+                        new/
+                            page.tsx
+                payment/
+                    [bookingId]/
+                        page.jsx
+                    failed/
+                        page.jsx
+                    success/
+                        page.jsx
+                play-search/
+                    page.tsx
+                play/
+                    page.tsx
+                    [id]/
+                        page.tsx
+                player/
+                    page.tsx
+                    bookings/
+                        page.tsx
+                    notifications/
+                        page.tsx
+                    play/
+                        [id]/
+                            page.tsx
+                    search/
+                        page.tsx
+                profile/
+                    page.tsx
+                stadiums/
+                    [id]/
+                        page.tsx
+                staff/
+                    bookings/
+                        page.jsx
+                    dashboard/
+                        page.jsx
+                    playgrounds/
+                        page.jsx
+                    reports/
+                        page.jsx
+            components/
+                admin/
+                    CreateCodeModal.tsx
+                    UserEditModal.tsx
+                auth/
+                    LoginForm.tsx
+                    SignupForm.tsx
+                bookings/
+                    BookingForm.tsx
+                    SlotPicker.tsx
+                dashboard/
+                    DashboardLayout.tsx
+                    Sidebar.tsx
+                    StatsCard.tsx
+                owner/
+                    FieldCard.tsx
+                    FieldForm.tsx
+                    StaffCard.tsx
+                    StaffForm.tsx
+                play/
+                    MatchCard.tsx
+                    MatchList.tsx
+                    PlayRequestForm.tsx
+                player/
+                    BookingCard.tsx
+                    CreateRequestModal.tsx
+                    DashboardHeader.tsx
+                    HistoryList.tsx
+                    JoinModal.tsx
+                    NotificationsList.tsx
+                    ProfileSummary.tsx
+                    RequestCard.tsx
+                profile/
+                    AvatarUploader.tsx
+                    ChangePasswordForm.tsx
+                    ProfileForm.tsx
+                stadiums/
+                    SlotPicker.tsx
+                    StadiumCard.tsx
+                    StadiumForm.tsx
+                staff/
+                    AttendanceToggle.tsx
+                ui/
+                    AnimateIn.tsx
+                    Badge.tsx
+                    Button.tsx
+                    Card.tsx
+                    ConfirmationDialog.tsx
+                    Input.tsx
+                    Modal.tsx
+                    ModalWrapper.tsx
+                    Pagination.tsx
+                    SearchBar.tsx
+                    SiteFooter.tsx
+                    SiteHeader.tsx
+                    toast.tsx
+                    useAppToast.tsx
+            hooks/
+                useApi.ts
+                useAuth.ts
+                useLocalStorage.ts
+            lib/
+                api.ts
+                auth.ts
+                authServer.ts
+                csv.ts
+                db.ts
+                errors.ts
+                fetcher.ts
+                http.ts
+                logger.ts
+                mail.ts
+                prisma.ts
+                rateLimiter.ts
+                utils.ts
+                withValidation.ts
+                payments/
+                    validateCode.ts
+            store/
+                authStore.ts
+            types/
+                index.ts
