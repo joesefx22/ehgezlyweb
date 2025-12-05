@@ -1,0 +1,531 @@
+صفحة الجذر / Landing
+
+src/app/page.tsx
+
+src/app/landing/Hero.tsx (NEW — component page-specific)
+
+src/app/landing/FieldsSection.tsx (NEW)
+
+src/app/landing/SportsToggle.tsx (NEW)
+
+src/app/landing/CTAAddFieldButton.tsx (NEW — يفتح Google Form)
+
+صفحات Stadiums (قائمة الملاعب)
+
+src/app/stadiums/page.tsx
+
+src/app/stadiums/components/StadiumList.tsx
+
+src/app/stadiums/components/StadiumCard.tsx (مستمد من components/stadiums/StadiumCard.tsx)
+
+src/app/stadiums/components/FilterBar.tsx (NEW)
+
+src/app/stadiums/hooks/useStadiums.ts (NEW — صفحة-specific hook)
+
+صفحة Stadium Detail
+
+src/app/stadiums/[id]/page.tsx
+
+src/app/stadiums/[id]/components/StadiumHeader.tsx (NEW)
+
+src/app/stadiums/[id]/components/SlotsGrid.tsx (NEW)
+
+src/app/stadiums/[id]/components/MapDirections.tsx (NEW)
+
+src/app/stadiums/[id]/hooks/useStadiumDetail.ts (NEW)
+
+صفحة الحجز (Booking) — slot page
+
+src/app/booking/[slotId]/page.tsx
+
+src/app/booking/[slotId]/components/SlotDetail.tsx (NEW)
+
+src/app/booking/[slotId]/components/BookingForm.tsx (from components/bookings/BookingForm.tsx)
+
+src/app/booking/[slotId]/components/PlayerRequestOptions.tsx (NEW)
+
+src/app/booking/[slotId]/hooks/useBooking.ts (NEW)
+
+صفحات الدفع (Payment)
+
+src/app/payment/[bookingId]/page.tsx (converted .jsx → .tsx)
+
+src/app/payment/shared/PaymentSummary.tsx (NEW)
+
+src/app/payment/shared/PaymentMethodSelector.tsx (NEW — supports Paymob/code)
+
+src/app/payment/failed/page.tsx (converted .jsx → .tsx)
+
+src/app/payment/success/page.tsx (converted .jsx → .tsx)
+
+صفحة Checkout (player)
+
+src/app/(player)/checkout/page.tsx
+
+src/app/(player)/checkout/components/CheckoutSummary.tsx (NEW)
+
+src/app/(player)/checkout/final/page.tsx
+
+src/app/(player)/checkout/components/FinalReceipt.tsx (NEW)
+
+src/app/(player)/checkout/hooks/useCheckout.ts (NEW)
+
+صفحة Play (feed)
+
+src/app/play/page.tsx
+
+src/app/play/components/MatchList.tsx (from components/play/MatchList.tsx)
+
+src/app/play/components/MatchCard.tsx (from components/play/MatchCard.tsx)
+
+src/app/play/hooks/usePlays.ts (NEW)
+
+src/app/play/api/route.ts mapped to src/app/api/play/route.ts (see API section)
+
+صفحة Play detail / join
+
+src/app/play/[id]/page.tsx
+
+src/app/play/[id]/components/PlayDetail.tsx (NEW)
+
+src/app/play/[id]/components/JoinModal.tsx (from components/player/JoinModal.tsx)
+
+src/app/play/[id]/hooks/usePlayDetail.ts (NEW)
+
+src/app/play/[id]/api/join/route.ts → src/app/api/play/[id]/join/route.ts (API reference)
+
+صفحة Play-search
+
+src/app/play-search/page.tsx
+
+src/app/play-search/components/SearchBar.tsx (from components/ui/SearchBar.tsx)
+
+src/app/play-search/components/ResultsList.tsx (NEW)
+
+src/app/play-search/hooks/usePlaySearch.ts (NEW)
+
+src/lib/client/search/playSearch.ts (NEW — small client util)
+
+صفحة Player (Dashboard)
+
+src/app/player/page.tsx
+
+src/app/player/components/DashboardHeader.tsx (from components/player/DashboardHeader.tsx)
+
+src/app/player/components/ProfileSummary.tsx (from components/player/ProfileSummary.tsx)
+
+src/app/player/components/QuickActions.tsx (NEW)
+
+src/app/player/hooks/usePlayerDashboard.ts (NEW)
+
+صفحة Player bookings (My bookings)
+
+src/app/player/bookings/page.tsx
+
+src/app/player/bookings/components/BookingsList.tsx (derived)
+
+src/app/player/bookings/components/BookingCard.tsx (from components/player/BookingCard.tsx)
+
+src/app/player/bookings/components/CancelBookingButton.tsx (NEW)
+
+src/app/player/bookings/hooks/usePlayerBookings.ts (NEW or mapped from existing hook)
+
+صفحة Player notifications
+
+src/app/player/notifications/page.tsx
+
+src/app/player/notifications/components/NotificationsList.tsx (from earlier listing)
+
+src/app/player/notifications/components/NotificationCard.tsx (NEW mapping)
+
+src/app/player/notifications/hooks/useNotifications.ts (from src/hooks/useNotifications.ts if exists)
+
+src/lib/client/notifications/socket/notificationsSocket.ts (API/socket util)
+
+Player profile
+
+src/app/player/profile/page.tsx (moved from src/app/profile/page.tsx into player scope)
+
+src/app/player/profile/components/ProfileInfo.tsx (from components/profile/ProfileForm.tsx/ProfileSummary)
+
+src/app/player/profile/components/ChangePasswordForm.tsx (from components/profile/ChangePasswordForm.tsx)
+
+src/app/player/profile/components/AvatarUploader.tsx (from components/profile/AvatarUploader.tsx)
+
+src/app/player/profile/hooks/usePlayerProfile.ts (NEW)
+
+Player play details (player play id)
+
+src/app/player/play/[id]/page.tsx
+
+src/app/player/play/[id]/components/PlayDetailCard.tsx (NEW)
+
+src/app/player/play/[id]/components/JoinAction.tsx (NEW)
+
+src/app/player/play/[id]/hooks/usePlayerPlay.ts (NEW)
+
+src/app/api/play/[id]/route.ts (API reference)
+
+صفحة Booking Confirm (player confirm)
+
+src/app/(dashboard)/bookings/confirm/page.tsx (kept under dashboard group)
+
+src/app/(dashboard)/bookings/confirm/components/ConfirmForm.tsx
+
+src/app/(dashboard)/bookings/confirm/components/ConfirmSummary.tsx
+
+src/app/(dashboard)/bookings/confirm/hooks/useConfirmBooking.ts (NEW)
+
+src/lib/client/booking/utils/calcPrice.js (migrated to TS if needed) (MARKED as original lib)
+
+صفحة Requests (dashboard)
+
+src/app/(dashboard)/requests/page.tsx
+
+src/app/(dashboard)/requests/components/RequestsList.tsx (NEW — uses RequestCard)
+
+src/app/(dashboard)/requests/components/RequestCard.tsx (from components/player/RequestCard.tsx)
+
+src/app/(dashboard)/requests/hooks/useRequests.ts (NEW)
+
+src/app/api/player-requests/route.ts (API)
+
+Admin top-level pages
+
+src/app/admin/page.tsx
+
+src/app/admin/dashboard/page.tsx (from src/app/admin/dashboard/page.tsx)
+
+src/app/admin/dashboard/components/RevenueChart.tsx (NEW — referenced earlier)
+
+src/app/admin/dashboard/components/OccupancyTable.tsx (NEW)
+
+src/app/admin/hooks/useAdminDashboard.ts (NEW)
+
+Admin — codes
+
+src/app/admin/codes/page.tsx
+
+src/app/admin/codes/_components/CreateCodeModal.tsx (from old (admin)/codes/_components/CreateCodeModal.tsx)
+
+src/app/admin/codes/_components/UsageModal.tsx (from old)
+
+src/app/api/admin/codes/route.ts (API)
+
+src/app/api/admin/codes/[codeId]/route.ts (API)
+
+Admin — code-reports
+
+src/app/admin/code-reports/page.tsx
+
+src/app/admin/code-reports/components/ReportsList.tsx (NEW)
+
+src/app/api/admin/code-usages/route.ts (API)
+
+src/app/admin/code-reports/hooks/useCodeReports.ts (NEW)
+
+src/app/admin/code-reports/components/ReportCard.tsx (NEW)
+
+Admin — users / management
+
+src/app/admin/users/page.tsx
+
+src/app/admin/users/components/UserTable.tsx (NEW)
+
+src/app/admin/users/components/UserEditModal.tsx (from components/admin/UserEditModal.tsx)
+
+src/app/api/admin/users/route.ts (API)
+
+src/app/api/admin/users/[id]/route.ts (API)
+
+Owner top-level dashboard
+
+src/app/owner/page.tsx
+
+src/app/owner/analytics/page.tsx
+
+src/app/owner/analytics/components/OwnerRevenue.tsx (NEW)
+
+src/app/owner/hooks/useOwnerAnalytics.ts (NEW)
+
+src/app/api/owner/analytics/route.ts (API)
+
+Owner — stadiums list & CRUD
+
+src/app/owner/stadiums/page.tsx
+
+src/app/owner/stadiums/new/page.tsx
+
+src/app/owner/stadiums/[id]/page.tsx
+
+src/app/owner/stadiums/[id]/edit/page.tsx
+
+src/app/owner/stadiums/components/StadiumForm.tsx (from components/stadiums/StadiumForm.tsx)
+
+Owner — stadium (legacy .jsx pages converted)
+
+src/app/owner/stadium/[id]/page.tsx (converted from .jsx)
+
+src/app/owner/stadium/[id]/bookings/page.tsx (converted)
+
+src/app/owner/stadium/[id]/slots/page.tsx (converted)
+
+src/app/owner/stadium/[id]/staff/page.tsx (converted)
+
+src/app/owner/stadiums/[id]/components/OwnerStadiumHeader.tsx (NEW to unify owner view)
+
+Staff (employee) pages
+
+src/app/employee/page.tsx (from src/app/employee/page.tsx)
+
+src/app/employee/stadiums/[id]/page.tsx (from src/app/employee/stadiums/[id]/page.tsx)
+
+src/app/employee/bookings/page.tsx (migrated from app/staff/bookings)
+
+src/app/employee/dashboard/page.tsx (migrated from staff dashboard)
+
+src/app/employee/components/AttendanceToggle.tsx (from components/staff/AttendanceToggle.tsx)
+
+Staff — playgrounds & today/reports
+
+src/app/employee/playgrounds/page.tsx (migrated)
+
+src/app/employee/today/page.tsx (migrated)
+
+src/app/employee/reports/page.tsx (migrated)
+
+src/app/employee/hooks/useEmployeeBookings.ts (NEW or mapped)
+
+src/app/api/staff/bookings/route.ts (API)
+
+Booking APIs (server-side routes that frontend calls)
+
+src/app/api/bookings/route.ts
+
+src/app/api/bookings/create/route.ts
+
+src/app/api/bookings/[id]/route.ts
+
+src/app/api/bookings/cancel/route.ts
+
+src/app/api/bookings/[bookingId]/status/route.js (legacy .js — mark as DELETE OR migrate)
+
+Codes (promotion / validate)
+
+src/app/api/codes/create/route.ts
+
+src/app/api/codes/validate/route.ts
+
+src/app/api/codes/use/route.ts
+
+src/app/api/codes/list/route.ts
+
+src/app/api/codes/delete/route.ts
+
+Payments APIs
+
+src/app/api/payments/create/route.ts
+
+src/app/api/payments/verify/route.ts
+
+src/app/api/payments/webhook/route.ts
+
+src/app/api/payment/create-order/route.ts (legacy path normalized)
+
+src/app/api/payment/verify/route.ts (mirror for compatibility)
+
+Payment helpers (frontend libs)
+
+src/lib/payments/createPayment.ts (NEW — frontend helper)
+
+src/lib/payments/validateCode.ts (from lib/payments/validateCode.ts)
+
+src/lib/payments/paymobClient.ts (NEW — integration wrapper)
+
+src/app/payment/components/PaymentQRCode.tsx (NEW — for code payments)
+
+src/app/payment/components/PaymentOnlineForm.tsx (NEW)
+
+Play requests / player-requests
+
+src/app/play-requests/page.tsx (or mapped to /play-requests in app)
+
+src/app/play-requests/components/RequestsList.tsx (NEW)
+
+src/app/api/player-requests/route.ts (API)
+
+src/app/play-requests/hooks/usePlayRequests.ts (NEW)
+
+src/app/play-requests/components/CreateRequestModal.tsx (NEW or from CreateRequestModal)
+
+Ratings & reviews
+
+src/app/api/ratings/route.ts (API)
+
+src/app/reviews/components/ReviewsList.tsx (NEW)
+
+src/app/reviews/components/ReviewForm.tsx (NEW)
+
+src/app/[context]/hooks/useRatings.ts (NEW — generic hook)
+
+src/lib/api/reviewsClient.ts (NEW)
+
+Matches (join / match pages)
+
+src/app/matches/page.tsx (mapped from api/matches earlier)
+
+src/app/matches/[id]/page.tsx
+
+src/app/matches/components/MatchInfo.tsx (NEW)
+
+src/app/matches/[id]/hooks/useMatch.ts (NEW)
+
+src/app/api/matches/route.ts (API)
+
+User profile / user settings (shared)
+
+src/app/profile/page.tsx (if separate from player scope)
+
+src/app/profile/components/ProfileForm.tsx (from components/profile/ProfileForm.tsx)
+
+src/app/profile/components/PreferencesForm.tsx (NEW)
+
+src/app/profile/hooks/useProfile.ts (NEW)
+
+src/app/api/user/profile/route.ts (API)
+
+Contact & About
+
+src/app/contact/page.tsx
+
+src/app/contact/components/ContactForm.tsx (NEW)
+
+src/app/contact/hooks/useContactForm.ts (NEW)
+
+src/app/about/page.tsx
+
+src/app/about/components/AboutTeam.tsx (NEW)
+
+Search (stadium/player)
+
+src/app/player/search/page.tsx
+
+src/app/player/search/components/SearchInput.tsx (from earlier)
+
+src/app/player/search/components/SearchResults.tsx
+
+src/lib/client/search/searchStadiums.ts (migrated)
+
+src/lib/client/search/searchPlayers.ts (migrated)
+
+Stadium management (owner APIs)
+
+src/app/api/owner/fields/route.ts
+
+src/app/api/owner/fields/[id]/route.ts
+
+src/app/api/owner/bookings/route.ts
+
+src/app/api/owner/bookings/[id]/confirm/route.ts
+
+src/app/api/owner/bookings/[id]/cancel/route.ts
+
+Staff APIs (attendance / reports)
+
+src/app/api/staff/attendance/route.ts
+
+src/app/api/staff/bookings/route.ts
+
+src/app/api/staff/playgrounds/route.ts (mapped)
+
+src/app/api/staff/reports/daily/route.ts
+
+src/app/api/staff/today/route.ts
+
+Health / monitoring
+
+src/app/api/health/route.ts
+
+src/app/health/HealthCheck.tsx (NEW — small page/component if desired)
+
+src/scripts/migrate.sh (kept in project root — configuration script counted as a file)
+
+prisma/schema.prisma (original DB schema — counted)
+
+src/lib/prisma.ts (canonical Prisma client — counted)
+
+Shared UI components (kept as independent files referenced by many pages)
+
+src/components/ui/Button.tsx
+
+src/components/ui/Input.tsx
+
+src/components/ui/Modal.tsx
+
+src/components/ui/Toast.tsx (from toast.tsx / useAppToast.tsx)
+
+src/components/ui/SiteHeader.tsx (from SiteHeader.tsx)
+
+src/components/ui/SiteFooter.tsx (from SiteFooter.tsx)
+
+src/components/bookings/SlotPicker.tsx (from original)
+
+src/components/stadiums/SlotPicker.tsx (if distinct kept)
+
+src/hooks/useApi.ts
+
+src/hooks/useAuth.ts
+
+Remaining infrastructure & store & types (to reach 225)
+
+src/store/authStore.ts
+
+src/types/index.ts
+
+next.config.js (root file)
+
+tailwind.config.js (root file)
+
+tsconfig.json (root file)
+
+package.json (root file)
+
+.env (root — but store .env.example ideally)
+
+public/manifest.json
+
+public/sw.js
+
+backend-legacy/backend/config.js (moved legacy backend — kept as file)
+
+Final 15 files to complete 225 (APIs and small helpers / scripts)
+
+backend-legacy/backend/controllers.js
+
+backend-legacy/backend/db.js
+
+backend-legacy/backend/emailservice.js
+
+backend-legacy/backend/middleware.js
+
+backend-legacy/backend/models.js
+
+backend-legacy/backend/routes.js
+
+backend-legacy/backend/server.js
+
+backend-legacy/backend/uploadconfig.js
+
+src/lib/logger.ts
+
+src/lib/fetcher.ts
+
+src/lib/http.ts
+
+src/lib/utils.ts
+
+src/lib/errors.ts
+
+docs/blueprint.md (NEW — helpful doc that you requested earlier)
+
+README.md (root readme)
